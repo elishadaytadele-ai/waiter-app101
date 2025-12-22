@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waiter — Stop Waiting. Send Someone Else.</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <script defer src="script.js"></script>
+</head>
+<body>
+    <button id="menuToggle" class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">☰</button>
+    <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
+    <div id="app">
+        <!-- Splash -->
+        <section id="splash" class="screen active">
+            <div class="center">
+                <div class="logo">🕒</div>
+                <h1 class="title">Stop Waiting.</h1>
+                <p class="tagline">Send Someone Else.</p>
+                <button class="cta" onclick="showScreen('onboard1')">Get Started</button>
+            </div>
+        </section>
+
+        <!-- Onboarding 1 -->
+        <section id="onboard1" class="screen">
+            <div class="content">
+                <h2>How it works</h2>
+                <ul class="features">
+                    <li>Book a verified person to wait or buy for you</li>
+                    <li>Prepay and pay per minute — only when they're working</li>
+                    <li>Track live, receive proof, and rate the service</li>
+                </ul>
+                <div class="nav-row">
+                    <button class="ghost" onclick="showScreen('splash')">Back</button>
+                    <button class="cta" onclick="showScreen('onboard2')">Next</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Onboarding 2 -->
+        <section id="onboard2" class="screen">
+            <div class="content">
+                <h2>Safe & Verified</h2>
+                <p>All waiters are verified and rated by customers.</p>
+                <div class="nav-row">
+                    <button class="ghost" onclick="showScreen('onboard1')">Back</button>
+                    <button class="cta" onclick="showScreen('dashboard')">Go to App</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard -->
+        <section id="dashboard" class="screen">
+            <header class="header">
+                <h3>Welcome back</h3>
+                <button class="icon" onclick="showScreen('profile')">👤</button>
+            </header>
+            <main class="content">
+                <div class="card active-booking" id="activeBookingMock" style="display:none;">
+                    <h4>Active Booking</h4>
+                    <div id="activeSummary">No active booking</div>
+                    <div class="row">
+                        <button class="ghost" onclick="showScreen('live')">Track</button>
+                    </div>
+                </div>
+
+                <div class="hero">
+                    <h2>Save time. Book a waiter.</h2>
+                    <p>We’ll wait, buy, or collect for you — paid per minute.</p>
+                    <button class="bookNow" onclick="showScreen('booking')">Book a Waiter</button>
+                </div>
+
+                <section class="history card">
+                    <h4>Previous bookings</h4>
+                    <ul id="historyList"><li>No previous bookings yet.</li></ul>
+                </section>
+            </main>
+        </section>
+
+        <!-- Booking Form -->
+        <section id="booking" class="screen">
+            <header class="header">
+                <button class="icon" onclick="showScreen('dashboard')">←</button>
+                <h3>New Booking</h3>
+                <div></div>
+            </header>
+            <main class="content form">
+                <label>Location
+                    <input id="inputLocation" placeholder="Enter address or place" />
+                </label>
+
+                <label>Task Type
+                    <select id="inputTask">
+                        <option value="wait">Stand in line</option>
+                        <option value="buy">Buy something</option>
+                        <option value="collect">Collect tickets</option>
+                    </select>
+                </label>
+
+                <label>Estimated wait (minutes)
+                    <input id="inputMinutes" type="number" min="5" value="20" />
+                </label>
+
+                <label>Optional purchase (amount)
+                    <input id="inputPurchase" type="number" min="0" value="0" />
+                </label>
+
+                <div class="costPreview">
+                    <div>Rate per minute: <strong id="ratePerMin">$0.50</strong></div>
+                    <div>Estimated cost: <strong id="estimatedCost">$10.00</strong></div>
+                </div>
+
+                <div class="nav-row">
+                    <button class="ghost" onclick="showScreen('dashboard')">Cancel</button>
+                    <button class="cta" id="confirmPrepayBtn">Confirm & Prepay</button>
+                </div>
+            </main>
+        </section>
+
+        <!-- Matching Screen -->
+        <section id="matching" class="screen">
+            <div class="center">
+                <h3>Matching you with a waiter</h3>
+                <p class="muted">This usually takes a few moments.</p>
+                <div class="waiterCard">
+                    <img src="https://via.placeholder.com/72" alt="waiter" />
+                    <div>
+                        <div class="name" id="waiterName">—</div>
+                        <div class="meta" id="waiterMeta">Rating • Jobs</div>
+                    </div>
+                </div>
+                <div class="loader">Searching…</div>
+                <div class="nav-row">
+                    <button class="ghost" onclick="showScreen('dashboard')">Cancel</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Tracking -->
+        <section id="live" class="screen">
+            <header class="header">
+                <button class="icon" onclick="showScreen('dashboard')">←</button>
+                <h3>Live Tracking</h3>
+                <div></div>
+            </header>
+            <main class="content">
+                <div class="tracker card">
+                    <div class="row between">
+                        <div>
+                            <div id="liveWaiterName">—</div>
+                            <div class="muted" id="liveWaiterStatus">Arriving</div>
+                        </div>
+                        <div class="timer" id="liveTimer">00:00</div>
+                    </div>
+                    <div class="map" id="mapPlaceholder">Map placeholder</div>
+                    <div class="row between small">
+                        <div>Cost: <strong id="liveCost">$0.00</strong></div>
+                        <div id="liveEarning">Rate: $0.50/min</div>
+                    </div>
+                    <label>Upload proof (optional)
+                        <input id="proofInput" type="file" accept="image/*" />
+                    </label>
+                    <div class="row">
+                        <button class="ghost" onclick="endBooking(true)">Finish</button>
+                        <button class="cta" onclick="endBooking(false)">Complete & Pay</button>
+                    </div>
+                </div>
+            </main>
+        </section>
+
+        <!-- Completion -->
+        <section id="complete" class="screen">
+            <div class="center">
+                <h3>Job Complete</h3>
+                <p id="finalSummary">Thanks — here's your summary.</p>
+                <div class="card rating">
+                    <h4>Rate your waiter</h4>
+                    <div class="stars" id="ratingStars">
+                        <button onclick="setRating(1)">★</button>
+                        <button onclick="setRating(2)">★</button>
+                        <button onclick="setRating(3)">★</button>
+                        <button onclick="setRating(4)">★</button>
+                        <button onclick="setRating(5)">★</button>
+                    </div>
+                    <label>Tip (optional)
+                        <input id="tipInput" type="number" min="0" value="0" />
+                    </label>
+                    <div class="nav-row">
+                        <button class="ghost" onclick="showScreen('dashboard')">Close</button>
+                        <button class="cta" onclick="submitRating()">Submit</button>
+                    </div>
+                </div>
+                <button class="link" onclick="showScreen('support')">Report an issue</button>
+            </div>
+        </section>
+
+        <!-- Profile -->
+        <section id="profile" class="screen">
+            <header class="header">
+                <button class="icon" onclick="showScreen('dashboard')">←</button>
+                <h3>Profile</h3>
+                <div></div>
+            </header>
+            <main class="content">
+                <div class="card">
+                    <label>Name
+                        <input id="profileName" value="Jane User" />
+                    </label>
+                    <label>Contact
+                        <input id="profileContact" value="(555) 123-4567" />
+                    </label>
+                    <label>Payment (mock)
+                        <input id="profilePayment" value="**** **** **** 4242" />
+                    </label>
+                    <div class="nav-row">
+                        <button class="ghost" onclick="showScreen('dashboard')">Back</button>
+                        <button class="cta" onclick="saveProfile()">Save</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h4>Wallet</h4>
+                    <div>Balance: <strong id="walletBalance">$50.00</strong></div>
+                </div>
+            </main>
+        </section>
+
+        <!-- Support / FAQ / Legal -->
+        <section id="support" class="screen">
+            <header class="header">
+                <button class="icon" onclick="showScreen('dashboard')">←</button>
+                <h3>Support</h3>
+                <div></div>
+            </header>
+            <main class="content">
+                <div class="card">
+                    <h4>FAQ</h4>
+                    <ul>
+                        <li>How are waiters verified? — By ID and background checks.</li>
+                        <li>Can I cancel? — Prepayment prevents cancellations.</li>
+                        <li>Is my purchase covered? — You provide funds for purchases.</li>
+                    </ul>
+                    <button class="cta" onclick="showScreen('legal')">Terms & Privacy</button>
+                </div>
+            </main>
+        </section>
+
+        <section id="legal" class="screen">
+            <header class="header">
+                <button class="icon" onclick="showScreen('support')">←</button>
+                <h3>Legal</h3>
+                <div></div>
+            </header>
+            <main class="content">
+                <div class="card">
+                    <h4>Terms of Service</h4>
+                    <p>Placeholder terms. Replace with your legal text.</p>
+                    <h4>Privacy Policy</h4>
+                    <p>Placeholder privacy policy. Replace before launch.</p>
+                </div>
+            </main>
+        </section>
+    </div>
+
+    <nav id="mobileMenu" class="mobile-menu" aria-hidden="true" role="menu">
+        <button class="mobile-item" role="menuitem" onclick="showScreen('dashboard');toggleMenu(false)">Home</button>
+        <button class="mobile-item" role="menuitem" onclick="showScreen('booking');toggleMenu(false)">Book</button>
+        <button class="mobile-item" role="menuitem" onclick="showScreen('support');toggleMenu(false)">Help</button>
+        <button class="mobile-item" id="menuThemeToggle" role="menuitem" onclick="toggleTheme();">Toggle theme</button>
+    </nav>
+    <div id="menuBackdrop" class="menu-backdrop" tabindex="-1" onclick="toggleMenu(false)"></div>
+</body>
+</html>
