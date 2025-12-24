@@ -154,7 +154,7 @@ function initAuthUI(){
       if(!email || !password){ if(authStatus) authStatus.textContent = 'Enter email and password'; return; }
       try{
         await auth.signInWithEmailAndPassword(email, password);
-        if(authStatus) authStatus.textContent = 'Signed in: ' + (auth.currentUser?.email || '');
+        if(authStatus) authStatus.textContent = 'Logged in as ' + (auth.currentUser?.email || '');
       }catch(err){
         console.error('Login error', err);
         if(authStatus) authStatus.textContent = 'Login failed: ' + (err.message || err);
@@ -162,7 +162,10 @@ function initAuthUI(){
     });
   }
 
-  if(logoutBtn) logoutBtn.addEventListener('click', ()=> auth.signOut());
+  if(logoutBtn) logoutBtn.addEventListener('click', ()=>{
+    if(authStatus) authStatus.textContent = 'Logged out';
+    auth.signOut();
+  });
 
   // Keep UI in sync with auth state
   auth.onAuthStateChanged(user=>{
@@ -171,13 +174,13 @@ function initAuthUI(){
       if(bookNowBtn) bookNowBtn.style.display = 'inline-block';
       if(loginForm) loginForm.style.display = 'none';
       if(logoutBtn) logoutBtn.style.display = 'inline-block';
-      if(authStatus) authStatus.textContent = 'Signed in: ' + user.email;
+      if(authStatus) authStatus.textContent = 'Logged in as ' + user.email;
     } else {
       if(bookingSection) bookingSection.style.display = 'none';
       if(bookNowBtn) bookNowBtn.style.display = 'none';
       if(loginForm) loginForm.style.display = 'block';
       if(logoutBtn) logoutBtn.style.display = 'none';
-      if(authStatus) authStatus.textContent = 'Not signed in';
+      if(authStatus) authStatus.textContent = 'Please sign in';
     }
   });
 }
@@ -299,3 +302,107 @@ window.toggleTheme = toggleTheme;
 window.toggleMenu = toggleMenu;
 
 console.log("JavaScript is working");
+
+// --- Added: Booking submission integration with Firebase Auth ---
+// Intercept confirmPrepay button click early (capture) to enforce auth and save booking
+(function(){
+  const btn = document.getElementById('confirmPrepayBtn');
+  if(!btn) return;
+  // guard to avoid double writes
+  window.__bookingWriteInProgress = window.__bookingWriteInProgress || false;
+  btn.addEventListener('click', async function interceptBooking(e){
+    // run during capture so we can stop if not authenticated
+    // don't prevent existing UI flow (we will let original handler run afterwards),
+    // but enforce auth and save booking to Firestore here.
+    try{
+      if(!auth || !auth.currentUser){
+        e.preventDefault();
+        alert('You must be logged in to submit a booking.');
+        return;
+      }
+      if(window.__bookingWriteInProgress) return;
+      window.__bookingWriteInProgress = true;
+
+      // collect booking data from existing form fields
+      const customerName = auth.currentUser.displayName || auth.currentUser.email || (document.getElementById('profileName')?.value || 'Anonymous');
+      const minutes = Number((document.getElementById('inputMinutes')?.value) || 0);
+      const serviceType = document.getElementById('inputTask')?.value || 'Wait in line';
+
+      if(!minutes || minutes < 1){
+        e.preventDefault();
+        alert('Please enter a valid number of minutes.');
+        window.__bookingWriteInProgress = false;
+        return;
+      }
+
+      // write booking to Firestore with required fields
+      await db.collection('bookings').add({
+        customerName: String(customerName),
+        Minutes: Number(minutes),
+        TimeStamp: firebase.firestore.FieldValue.serverTimestamp(),
+        userId: auth.currentUser.uid,
+        serviceType: serviceType
+      });
+
+      // show simple success feedback (non-invasive)
+      try{ alert('Booking saved successfully.'); }catch(e){ console.log('Booking saved'); }
+
+    }catch(err){
+      console.error('Error saving booking:', err);
+      try{ alert('Failed to save booking: ' + (err.message || err)); }catch(e){ }
+    }finally{
+      window.__bookingWriteInProgress = false;
+    }
+  }, {capture:true});
+})();
+
+// --- Optional: display bookings for current user in `#historyList` ---
+(function(){
+  let unsubscribeUserBookings = null;
+
+  function clearHistoryList(){
+    const list = document.getElementById('historyList');
+    if(!list) return;
+    list.innerHTML = '';
+  }
+
+  function renderBookingsSnapshot(snapshot){
+    const list = document.getElementById('historyList');
+    if(!list) return;
+    list.innerHTML = '';
+    if(snapshot.empty){
+      const li = document.createElement('li'); li.textContent = 'No previous bookings yet.'; list.appendChild(li); return;
+    }
+    snapshot.forEach(doc=>{
+      const d = doc.data();
+      const minutes = d.Minutes || d.minutes || 0;
+      const when = d.TimeStamp && d.TimeStamp.toDate ? d.TimeStamp.toDate().toLocaleString() : '';
+      const li = document.createElement('li');
+      li.textContent = `${d.serviceType || 'Wait in line'} — ${minutes}m — ${d.customerName || ''} ${when ? '— ' + when : ''}`;
+      list.appendChild(li);
+    });
+  }
+
+  // subscribe to bookings for a user id
+  function subscribeUserBookings(uid){
+    if(unsubscribeUserBookings) unsubscribeUserBookings();
+    try{
+      unsubscribeUserBookings = db.collection('bookings')
+        .where('userId','==',uid)
+        .orderBy('TimeStamp','desc')
+        .onSnapshot(renderBookingsSnapshot, err => console.error('bookings snapshot error', err));
+    }catch(err){
+      console.warn('Could not subscribe to user bookings:', err);
+      unsubscribeUserBookings = null;
+    }
+  }
+
+  // hook into auth state to subscribe/unsubscribe
+  if(auth && typeof auth.onAuthStateChanged === 'function'){
+    auth.onAuthStateChanged(user=>{
+      if(user){ subscribeUserBookings(user.uid); }
+      else { if(unsubscribeUserBookings) unsubscribeUserBookings(); clearHistoryList(); const li = document.createElement('li'); li.textContent='No previous bookings yet.'; document.getElementById('historyList')?.appendChild(li); }
+    });
+  }
+
+})();
