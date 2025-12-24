@@ -1,8 +1,6 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
-
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBfYtxWYiTOAGDN7-mEM_Vq-LCeNOVx6oQ",
@@ -12,10 +10,12 @@ const firebaseConfig = {
   messagingSenderId: "451129298666",
   appId: "1:451129298666:web:c48799cb276da1f18dd193"
 };
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+
 db.collection("test").add({
-  status: "connected",
+  connected: true,
   time: new Date()
 })
 .then(() => {
