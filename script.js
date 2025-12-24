@@ -323,9 +323,13 @@ console.log("JavaScript is working");
       if(window.__bookingWriteInProgress) return;
       window.__bookingWriteInProgress = true;
 
-      // collect booking data from existing form fields
-      const customerName = auth.currentUser.displayName || auth.currentUser.email || (document.getElementById('profileName')?.value || 'Anonymous');
-      const minutes = Number((document.getElementById('inputMinutes')?.value) || 0);
+      // collect booking data from form fields (prefer newly added booking inputs)
+      const customerName = (document.getElementById('bookingCustomerName')?.value?.trim())
+        || auth.currentUser.displayName
+        || auth.currentUser.email
+        || (document.getElementById('profileName')?.value || 'Anonymous');
+      const minutes = Number((document.getElementById('bookingMinutes')?.value)
+        || (document.getElementById('inputMinutes')?.value) || 0);
       const serviceType = document.getElementById('inputTask')?.value || 'Wait in line';
 
       if(!minutes || minutes < 1){
@@ -344,12 +348,24 @@ console.log("JavaScript is working");
         serviceType: serviceType
       });
 
-      // show simple success feedback (non-invasive)
-      try{ alert('Booking saved successfully.'); }catch(e){ console.log('Booking saved'); }
+      // show inline success feedback and reset form fields (non-invasive)
+      try{
+        const msg = document.getElementById('bookingMsg');
+        if(msg){ msg.textContent = 'Booking saved successfully.'; msg.className = 'muted small'; }
+        // reset fields we added
+        if(document.getElementById('bookingCustomerName')) document.getElementById('bookingCustomerName').value = '';
+        if(document.getElementById('bookingMinutes')) document.getElementById('bookingMinutes').value = '15';
+        // leave existing inputs (location/purchase) as-is, but optionally reset
+        setTimeout(()=>{ if(msg) msg.textContent = ''; }, 4000);
+      }catch(e){ console.log('Booking saved'); }
 
     }catch(err){
       console.error('Error saving booking:', err);
-      try{ alert('Failed to save booking: ' + (err.message || err)); }catch(e){ }
+      try{
+        const msg = document.getElementById('bookingMsg');
+        if(msg){ msg.textContent = 'Failed to save booking: ' + (err.message || err); msg.style.color = 'var(--muted)'; }
+        else alert('Failed to save booking: ' + (err.message || err));
+      }catch(e){ }
     }finally{
       window.__bookingWriteInProgress = false;
     }
