@@ -105,6 +105,17 @@
                 <div></div>
             </header>
             <main class="content form">
+                <!-- Added: small customer-facing booking inputs (kept in addition to existing fields) -->
+                <label>Customer name
+                    <input id="bookingCustomerName" placeholder="Your name (optional)" />
+                </label>
+
+                <label>Minutes (quick entry)
+                    <input id="bookingMinutes" type="number" min="1" value="15" />
+                </label>
+
+                <div id="bookingMsg" class="muted small" aria-live="polite" style="margin-bottom:8px"></div>
+
                 <label>Location
                     <input id="inputLocation" placeholder="Enter address or place" />
                 </label>
