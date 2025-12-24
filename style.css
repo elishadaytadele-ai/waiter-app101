@@ -1,70 +1,102 @@
 /* Light / Dark theme variables and defaults (mobile-first) */
 :root{
-  --bg: #F7FAFF;
+  --bg: #F5F5F5; /* light background */
   --surface: #FFFFFF;
-  --primary: #1E40AF; /* indigo */
-  --accent: #F97316;  /* orange CTA */
-  --text: #0F172A;
+  --primary: #4A90E2; /* blue */
+  --accent: #F5A623;  /* orange CTA */
+  --text: #1A1A1A;
   --muted: #6B7280;
   --card: #FFFFFF;
   --border: #E6EDF7;
-  --shadow: 0 6px 20px rgba(16,24,40,0.06);
+  --toggle-bg: rgba(0,0,0,0.06);
 }
 
 /* Dark theme overrides */
 [data-theme="dark"]{
-  --bg: #0B1220;
-  --surface: #0F1724;
-  --primary: #60A5FA;
-  --accent: #FB923C;
-  --text: #E6EEF8;
+  --bg: #121212;
+  --surface: #1A1A1A;
+  --primary: #4A90E2;
+  --accent: #F5A623;
+  --text: #EAEAEA;
   --muted: #9CA3AF;
-  --card: #0B1220;
-  --border: #132028;
-  --shadow: 0 6px 30px rgba(2,6,23,0.6);
+  --card: #171717;
+  --border: #2A2A2A;
+  --toggle-bg: rgba(255,255,255,0.06);
 }
 
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;font-family:Roboto,system-ui,Arial,sans-serif;background:var(--bg);color:var(--text);transition:background .25s,color .25s}
-h1,h2,h3,h4,h5,h6{font-family:Poppins,Roboto,Arial;font-weight:700;margin:0}
+.title, h1,h2,h3,h4,h5,h6{font-family:Poppins,Roboto,Arial;font-weight:700}
 
+/* subtle transitions */
 button, input, select {transition:background .18s, color .18s, border-color .18s, transform .12s}
-button:active{transform:translateY(1px)}
-
+button:active{transform:scale(.995)}
 .screen{display:none;padding:16px 20px}
 .screen.active{display:block}
-.center{max-width:480px;margin:36px auto;text-align:center}
-.booking-card{padding:22px}
-.muted{color:var(--muted)}
-.small{font-size:13px}
-
-.cta{background:var(--accent);color:#fff;border:none;padding:12px 18px;border-radius:12px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)}
-.cta:hover{filter:brightness(.98);transform:translateY(-2px)}
-.ghost{background:transparent;border:1px solid var(--border);padding:10px 14px;border-radius:10px;color:var(--text);cursor:pointer}
-.ghost:hover{background:rgba(0,0,0,0.02)}
+.center{max-width:420px;margin:48px auto;text-align:center}
+.logo{font-size:48px}
+.title{font-family:Poppins,Roboto,Arial;font-weight:700;color:var(--primary);margin:12px 0}
+.tagline{color:var(--muted);margin-bottom:20px}
+.cta{background:var(--accent);color:#fff;border:none;padding:12px 18px;border-radius:10px;font-weight:600}
+.ghost{background:transparent;border:1px solid var(--border);padding:10px 14px;border-radius:10px;color:var(--text)}
 .link{background:none;border:none;color:var(--primary);text-decoration:underline}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px}
+.icon{background:transparent;border:none;font-size:18px;color:var(--text)}
+.content{max-width:720px;margin:12px auto}
+.hero{background:linear-gradient(180deg, var(--surface) 0%, rgba(255,255,255,0.02) 100%);padding:18px;border-radius:12px;margin-bottom:16px;border:1px solid var(--border)}
+.bookNow{background:var(--primary);color:#fff;padding:12px 16px;border-radius:10px;border:none}
+.card{background:var(--card);padding:14px;border-radius:12px;margin-bottom:12px;border:1px solid var(--border)}
+.history ul{padding-left:18px;margin:8px 0}
+.form label{display:block;margin-bottom:12px;color:var(--muted)}
+.form input,.form select{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);margin-top:6px;background:transparent;color:var(--text)}
+.costPreview{display:flex;justify-content:space-between;padding:8px 0;color:var(--muted)}
+.nav-row{display:flex;gap:8px;justify-content:space-between;margin-top:12px}
+.waiterCard{display:flex;gap:12px;align-items:center;justify-content:center;background:var(--surface);padding:12px;border-radius:10px;margin:12px 0;border:1px solid var(--border)}
+.waiterCard img{width:72px;height:72px;border-radius:8px;object-fit:cover}
+.loader{color:var(--muted);margin:10px 0;display:inline-block}
 
-.card{background:var(--card);border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow)}
+/* loader animation (subtle pulse) */
+.loader{animation:loaderPulse 1.4s ease-in-out infinite}
+@keyframes loaderPulse{
+  0%{opacity:0.45;transform:translateY(0)}
+  50%{opacity:1;transform:translateY(-3px)}
+  100%{opacity:0.45;transform:translateY(0)}
+}
+.tracker .map{height:160px;border-radius:10px;background:linear-gradient(90deg,#2b6cb0,#e0f2fe);display:flex;align-items:center;justify-content:center;color:var(--muted);margin:12px 0;overflow:hidden;position:relative}
 
-form{margin-top:12px;text-align:left}
-form label{display:block;margin-bottom:12px;color:var(--muted);font-weight:500}
-form input[type="text"], form input[type="number"]{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);margin-top:6px;background:transparent;color:var(--text);font-size:15px}
-form input:focus{outline:none;border-color:var(--primary);box-shadow:0 6px 18px rgba(30,64,175,0.06)}
-
-.nav-row{display:flex;gap:12px;justify-content:space-between;margin-top:12px}
-
-.msg{margin-top:12px;padding:10px;border-radius:8px}
-.msg.success{background:#ECFDF5;color:#065F46;border:1px solid #D1FAE5}
-.msg.error{background:#FFEEF0;color:#7F1D1D;border:1px solid #FECACA}
+/* mock moving marker animation inside map placeholder */
+.map::after{content:'';width:12px;height:12px;border-radius:50%;background:var(--accent);position:absolute;left:20%;top:60%;box-shadow:0 4px 12px rgba(0,0,0,0.12);animation:markerMove 6s linear infinite}
+@keyframes markerMove{0%{left:10%;top:60%}25%{left:60%;top:55%}50%{left:70%;top:30%}75%{left:30%;top:20%}100%{left:10%;top:60%}}
+.row{display:flex;gap:12px}
+.between{justify-content:space-between}
+.small{font-size:13px}
+.timer{font-weight:700;background:var(--surface);padding:8px 10px;border-radius:10px}
+.rating .stars button{background:transparent;border:none;font-size:20px;color:var(--accent)}
+.bottomNav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--border);padding:8px 12px;display:flex;justify-content:space-around}
 
 /* Theme toggle */
 .theme-toggle{position:fixed;right:14px;top:12px;background:var(--surface);border:1px solid var(--border);padding:8px;border-radius:10px;cursor:pointer;font-size:16px;box-shadow:0 6px 18px rgba(0,0,0,0.06);color:var(--text)}
+
+/* menu toggle (burger) */
 .menu-toggle{position:fixed;left:14px;top:12px;background:var(--surface);border:1px solid var(--border);padding:8px;border-radius:10px;cursor:pointer;font-size:18px;box-shadow:0 6px 18px rgba(0,0,0,0.06);color:var(--text)}
 
-/* responsive */
+/* mobile menu sliding panel */
+.mobile-menu{position:fixed;left:0;top:0;bottom:0;width:260px;background:var(--surface);box-shadow:8px 0 30px rgba(0,0,0,0.12);transform:translateX(-110%);transition:transform .28s ease;border-right:1px solid var(--border);padding:20px;display:flex;flex-direction:column;gap:12px;z-index:400}
+[data-menu="open"] .mobile-menu{transform:translateX(0)}
+.mobile-menu .mobile-item{background:transparent;border:1px solid var(--border);padding:10px;border-radius:10px;text-align:left;color:var(--text)}
+.mobile-menu .mobile-item:active{transform:scale(.995)}
+
+/* backdrop when menu open */
+.menu-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.32);opacity:0;pointer-events:none;transition:opacity .2s;z-index:350;display:none}
+[data-menu="open"] .menu-backdrop{opacity:1;pointer-events:auto;display:block}
+
+/* hide old bottom nav (we use burger) */
+.bottomNav{display:none}
+
+/* Responsive / mobile-first tweaks */
 @media(min-width:700px){
-  .center{margin-top:48px}
-  .booking-card{max-width:560px}
+  .center{margin-top:40px}
+  .content{padding:0 20px}
 }
 
 /* small helpful utils */
@@ -72,5 +104,7 @@ form input:focus{outline:none;border-color:var(--primary);box-shadow:0 6px 18px 
 .name{font-weight:600;color:var(--text)}
 .meta{font-size:13px;color:var(--muted)}
 
-h1 { color: var(--primary); }
+h1 {
+    color: #1E3A8A;
+}
 
