@@ -24,8 +24,6 @@ db.collection("test").add({
 .catch((error) => {
   console.error("Firebase error:", error);
 });
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
 // Simple frontend prototype logic for booking, matching, live tracking, and rating
 const RATE_PER_MIN = 0.5;
 // Defensive placeholders for inline handlers (avoid "undefined" during early clicks)
