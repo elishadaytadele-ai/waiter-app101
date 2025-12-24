@@ -1,3 +1,31 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBfYtxWYiTOAGDN7-mEM_Vq-LCeNOVx6oQ",
+  authDomain: "waiter-app101.firebaseapp.com",
+  projectId: "waiter-app101",
+  storageBucket: "waiter-app101.firebasestorage.app",
+  messagingSenderId: "451129298666",
+  appId: "1:451129298666:web:c48799cb276da1f18dd193"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+db.collection("test").add({
+  status: "connected",
+  time: new Date()
+})
+.then(() => {
+  console.log("Firebase connected successfully");
+})
+.catch((error) => {
+  console.error("Firebase error:", error);
+});
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 // Simple frontend prototype logic for booking, matching, live tracking, and rating
 const RATE_PER_MIN = 0.5;
 // Defensive placeholders for inline handlers (avoid "undefined" during early clicks)
