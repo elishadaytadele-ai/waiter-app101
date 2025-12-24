@@ -49,6 +49,20 @@ button:active{transform:scale(.995)}
 .history ul{padding-left:18px;margin:8px 0}
 .form label{display:block;margin-bottom:12px;color:var(--muted)}
 .form input,.form select{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);margin-top:6px;background:transparent;color:var(--text)}
+
+/* Auth card specifics (login/logout/status) */
+#authCard{padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--card);}
+#authCard h4{margin-bottom:8px}
+#authCard label{display:block;margin-bottom:10px;color:var(--muted);font-weight:500}
+#authCard input{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);margin-top:6px;background:transparent;color:var(--text)}
+#authCard .nav-row{justify-content:flex-start}
+#logoutBtn{padding:8px 12px;border-radius:10px}
+#authStatus{margin-top:10px;color:var(--muted);font-size:13px}
+
+@media(max-width:520px){
+  #authCard{padding:12px}
+  .center{margin:20px auto}
+}
 .costPreview{display:flex;justify-content:space-between;padding:8px 0;color:var(--muted)}
 .nav-row{display:flex;gap:8px;justify-content:space-between;margin-top:12px}
 .waiterCard{display:flex;gap:12px;align-items:center;justify-content:center;background:var(--surface);padding:12px;border-radius:10px;margin:12px 0;border:1px solid var(--border)}
