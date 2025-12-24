@@ -353,9 +353,21 @@ console.log("JavaScript is working");
         const msg = document.getElementById('bookingMsg');
         if(msg){ msg.textContent = 'Booking saved successfully.'; msg.className = 'muted small'; }
         // reset fields we added
-        if(document.getElementById('bookingCustomerName')) document.getElementById('bookingCustomerName').value = '';
-        if(document.getElementById('bookingMinutes')) document.getElementById('bookingMinutes').value = '15';
-        // leave existing inputs (location/purchase) as-is, but optionally reset
+        const elName = document.getElementById('bookingCustomerName');
+        if(elName) elName.value = '';
+        const elMin = document.getElementById('bookingMinutes');
+        if(elMin) elMin.value = '15';
+        // also reset the main form inputs for a clean form state
+        const elInputMinutes = document.getElementById('inputMinutes');
+        if(elInputMinutes) elInputMinutes.value = '20';
+        const elInputPurchase = document.getElementById('inputPurchase');
+        if(elInputPurchase) elInputPurchase.value = '0';
+        const elLocation = document.getElementById('inputLocation');
+        if(elLocation) elLocation.value = '';
+        const elTask = document.getElementById('inputTask');
+        if(elTask) elTask.value = 'wait';
+        // refresh estimate display
+        try{ updateEstimate(); }catch(e){}
         setTimeout(()=>{ if(msg) msg.textContent = ''; }, 4000);
       }catch(e){ console.log('Booking saved'); }
 
@@ -422,3 +434,4 @@ console.log("JavaScript is working");
   }
 
 })();
+
