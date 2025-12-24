@@ -63,6 +63,8 @@ button:active{transform:scale(.995)}
   #authCard{padding:12px}
   .center{margin:20px auto}
 }
+/* Booking inline message */
+#bookingMsg{padding:8px;border-radius:8px}
 .costPreview{display:flex;justify-content:space-between;padding:8px 0;color:var(--muted)}
 .nav-row{display:flex;gap:8px;justify-content:space-between;margin-top:12px}
 .waiterCard{display:flex;gap:12px;align-items:center;justify-content:center;background:var(--surface);padding:12px;border-radius:10px;margin:12px 0;border:1px solid var(--border)}
@@ -121,4 +123,5 @@ button:active{transform:scale(.995)}
 h1 {
     color: #1E3A8A;
 }
+
 
