@@ -1,30 +1,29 @@
-// Import the functions you need from the SDKs you need
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyBfYtxWYiTOAGDN7-mEM_Vq-LCeNOVx6oQ",
-  authDomain: "waiter-app101.firebaseapp.com",
-  projectId: "waiter-app101",
-  storageBucket: "waiter-app101.firebasestorage.app",
-  messagingSenderId: "451129298666",
-  appId: "1:451129298666:web:c48799cb276da1f18dd193"
-};
+/* Firebase removed — lightweight local/demo storage used instead */
+const BOOKINGS_KEY = 'wa_bookings';
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+function loadLocalBookings(){
+  try{ return JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]'); }catch(e){ return []; }
+}
 
-db.collection("test").add({
-  connected: true,
-  time: new Date()
-})
-.then(() => {
-  console.log("Firebase connected successfully");
-})
-.catch((error) => {
-  console.error("Firebase error:", error);
-});
+function saveLocalBooking(b){
+  const arr = loadLocalBookings();
+  arr.unshift(b);
+  localStorage.setItem(BOOKINGS_KEY, JSON.stringify(arr));
+}
+
+function renderLocalHistory(){
+  const list = document.getElementById('historyList');
+  if(!list) return;
+  const items = loadLocalBookings();
+  list.innerHTML = '';
+  if(items.length===0){ list.appendChild(Object.assign(document.createElement('li'),{textContent:'No previous bookings yet.'})); return; }
+  items.forEach(d=>{
+    const li = document.createElement('li');
+    const when = d.TimeStamp ? new Date(d.TimeStamp).toLocaleString() : '';
+    li.textContent = `${d.serviceType || 'Wait in line'} — ${d.Minutes||0}m — ${d.customerName||''} ${when? '— '+when : ''}`;
+    list.appendChild(li);
+  });
+}
 // Simple frontend prototype logic for booking, matching, live tracking, and rating
 const RATE_PER_MIN = 0.5;
 // Defensive placeholders for inline handlers (avoid "undefined" during early clicks)
@@ -38,9 +37,29 @@ let liveSeconds = 0;
 let currentBooking = null;
 
 function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  const el = document.getElementById(id);
-  if(el) el.classList.add('active');
+  const duration = 60; // match CSS transition (ms)
+  const current = document.querySelector('.screen.active');
+  const target = document.getElementById(id);
+  if(current && current.id === id) return;
+  // animate current out
+  if(current){
+    current.classList.remove('fade-in');
+    current.classList.add('fade-out');
+    // keep it active during the fade, then remove
+    setTimeout(()=>{
+      current.classList.remove('active','fade-out');
+    }, duration);
+  }
+  // animate target in
+  if(target){
+    // ensure any previous state cleared
+    target.classList.remove('fade-out');
+    target.classList.add('active','fade-in');
+    // cleanup fade-in after animation
+    setTimeout(()=>{ target.classList.remove('fade-in'); }, duration);
+    // reset scroll
+    try{ window.scrollTo(0,0); }catch(e){}
+  }
 }
 
 // Booking form interactions
@@ -50,8 +69,8 @@ function updateEstimate(){
   const mins = Number(inputMinutes().value||0);
   const purchase = Number(inputPurchase().value||0);
   const est = (mins * RATE_PER_MIN) + purchase;
-  document.getElementById('estimatedCost').textContent = `$${est.toFixed(2)}`;
-  document.getElementById('ratePerMin').textContent = `$${RATE_PER_MIN.toFixed(2)}`;
+  document.getElementById('estimatedCost').textContent = `${est.toFixed(2)}ETB`;
+  document.getElementById('ratePerMin').textContent = `${RATE_PER_MIN.toFixed(2)}ETB`;
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
@@ -69,13 +88,11 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(__backdropInit) __backdropInit.style.display = 'none';
   document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') toggleMenu(false); });
   // ensure menu theme button mirrors main theme
-  const mBtn = document.getElementById('menuThemeToggle');
-  if(mBtn) mBtn.addEventListener('click',()=>{
-    // delay slightly so applyTheme runs first
-    setTimeout(syncMenuThemeButton,120);
-  });
-  // initialize auth UI wiring
-  if(typeof initAuthUI === 'function') initAuthUI();
+  // (menuThemeToggle removed from menu; top theme toggle remains)
+  // render local history (if any)
+  renderLocalHistory();
+  // update profile UI (avatar initials, booking count, recent bookings)
+  if(typeof refreshProfileUI === 'function') refreshProfileUI();
 });
 
 // THEME: light/dark toggle with persistence
@@ -136,63 +153,12 @@ function toggleMenu(open){
 
 // AUTH: Email/password authentication UI wiring
 function initAuthUI(){
-  const loginForm = document.getElementById('loginForm');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const authStatus = document.getElementById('authStatus');
-  const bookingSection = document.getElementById('booking');
-  const bookNowBtn = document.querySelector('.bookNow');
-
-  // hide booking UI by default until auth state resolved
-  if(bookingSection) bookingSection.style.display = 'none';
-  if(bookNowBtn) bookNowBtn.style.display = 'none';
-
-  if(loginForm){
-    loginForm.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const email = (document.getElementById('loginEmail')?.value || '').trim();
-      const password = document.getElementById('loginPassword')?.value || '';
-      if(!email || !password){ if(authStatus) authStatus.textContent = 'Enter email and password'; return; }
-      try{
-        await auth.signInWithEmailAndPassword(email, password);
-        if(authStatus) authStatus.textContent = 'Logged in as ' + (auth.currentUser?.email || '');
-      }catch(err){
-        console.error('Login error', err);
-        if(authStatus) authStatus.textContent = 'Login failed: ' + (err.message || err);
-      }
-    });
-  }
-
-  if(logoutBtn) logoutBtn.addEventListener('click', ()=>{
-    if(authStatus) authStatus.textContent = 'Logged out';
-    auth.signOut();
-  });
-
-  // Keep UI in sync with auth state
-  auth.onAuthStateChanged(user=>{
-    if(user){
-      if(bookingSection) bookingSection.style.display = 'block';
-      if(bookNowBtn) bookNowBtn.style.display = 'inline-block';
-      if(loginForm) loginForm.style.display = 'none';
-      if(logoutBtn) logoutBtn.style.display = 'inline-block';
-      if(authStatus) authStatus.textContent = 'Logged in as ' + user.email;
-    } else {
-      if(bookingSection) bookingSection.style.display = 'none';
-      if(bookNowBtn) bookNowBtn.style.display = 'none';
-      if(loginForm) loginForm.style.display = 'block';
-      if(logoutBtn) logoutBtn.style.display = 'none';
-      if(authStatus) authStatus.textContent = 'Please sign in';
-    }
-  });
+  // auth UI removed — login/signup removed from markup per request
 }
 
 
 function confirmPrepay(){
-  // require signed-in user
-  if(!auth || !auth.currentUser){
-    alert('Please sign in to submit a booking.');
-    showScreen('dashboard');
-    return;
-  }
+  // proceed without requiring sign-in
   const location = document.getElementById('inputLocation').value || 'Unknown location';
   const task = document.getElementById('inputTask').value;
   const mins = Number(inputMinutes().value||0);
@@ -205,15 +171,35 @@ function confirmPrepay(){
   document.getElementById('waiterName').textContent = 'Finding...';
   document.getElementById('waiterMeta').textContent = '';
   showScreen('matching');
+  // start live timer immediately so user sees time tracked as soon as they confirm
+  try{ startLive(currentBooking); }catch(e){console.error('startLive failed',e)}
+  // Save booking locally (non-blocking)
+  try{
+    const bookingRecord = {
+      customerName: (document.getElementById('bookingCustomerName')?.value || 'Anonymous'),
+      Minutes: Number(mins),
+      purchase: Number(purchase),
+      prepaid: Number(prepaid),
+      TimeStamp: new Date().toISOString(),
+      serviceType: task,
+      location: location
+    };
+    saveLocalBooking(bookingRecord);
+    const msg = document.getElementById('bookingMsg');
+    if(msg){ msg.textContent = 'Booking saved.'; setTimeout(()=>msg.textContent = '',3000); }
+    renderLocalHistory();
+    if(typeof refreshProfileUI === 'function') refreshProfileUI();
+  }catch(err){ console.error('Failed to save booking locally:', err); }
   setTimeout(()=>{
     // fake waiter
     const waiter = {name:'Alex P.',rating:4.8,jobs:142,img:'https://via.placeholder.com/72'};
-    document.querySelector('#matching .waiterCard img').src = waiter.img;
+    const img = document.querySelector('#matching .waiterCard img');
+    if(img) img.src = waiter.img;
     document.getElementById('waiterName').textContent = waiter.name;
     document.getElementById('waiterMeta').textContent = `${waiter.rating} • ${waiter.jobs} jobs`;
+    // if user was viewing matching, switch to live view now that waiter found
+    showScreen('live');
   },800);
-  // simulate matched -> start live after short delay
-  setTimeout(()=>startLive(currentBooking),2500);
 }
 
 function startLive(booking){
@@ -225,7 +211,7 @@ function startLive(booking){
   // populate live UI
   document.getElementById('liveWaiterName').textContent = 'Alex P.';
   document.getElementById('liveWaiterStatus').textContent = 'Arriving';
-  document.getElementById('liveEarning').textContent = `Rate: $${RATE_PER_MIN.toFixed(2)}/min`;
+  document.getElementById('liveEarning').textContent = `Rate: ${RATE_PER_MIN.toFixed(2)}ETB/min`;
   updateLiveCost();
   if(liveTimerId) clearInterval(liveTimerId);
   liveTimerId = setInterval(()=>{
@@ -241,7 +227,7 @@ function startLive(booking){
 function updateLiveCost(){
   const minutes = liveSeconds/60;
   const cost = (minutes * RATE_PER_MIN) + (currentBooking?.purchase||0) || 0;
-  document.getElementById('liveCost').textContent = `$${cost.toFixed(2)}`;
+  document.getElementById('liveCost').textContent = `${cost.toFixed(2)}ETB`;
 }
 
 function endBooking(finishWithoutPay=false){
@@ -250,7 +236,7 @@ function endBooking(finishWithoutPay=false){
   const totalMinutes = Math.max(1, Math.ceil(liveSeconds/60));
   const workCost = totalMinutes * RATE_PER_MIN;
   const finalCost = workCost + (currentBooking?.purchase||0);
-  document.getElementById('finalSummary').textContent = `Total: $${finalCost.toFixed(2)} — ${totalMinutes} minute(s)`;
+  document.getElementById('finalSummary').textContent = `Total: ${finalCost.toFixed(2)}ETB — ${totalMinutes} minute(s)`;
   // save to history
   addToHistory({id:currentBooking.id,cost:finalCost,minutes:totalMinutes,task:currentBooking.task});
   showScreen('complete');
@@ -259,7 +245,7 @@ function endBooking(finishWithoutPay=false){
 function addToHistory(entry){
   const list = document.getElementById('historyList');
   const li = document.createElement('li');
-  li.textContent = `${entry.task} — $${entry.cost.toFixed(2)} — ${entry.minutes}m`;
+  li.textContent = `${entry.task} — ${entry.cost.toFixed(2)}ETB — ${entry.minutes}m`;
   list.prepend(li);
 }
 
@@ -282,7 +268,7 @@ function setRating(n){
 
 function submitRating(){
   const tip = Number(document.getElementById('tipInput').value||0);
-  alert('Thanks — tip: $'+tip.toFixed(2));
+  alert('Thanks — tip: '+tip.toFixed(2)+'ETB');
   showScreen('dashboard');
 }
 
@@ -302,136 +288,36 @@ window.toggleTheme = toggleTheme;
 window.toggleMenu = toggleMenu;
 
 console.log("JavaScript is working");
+// Booking interceptor removed — saving now handled inside confirmPrepay().
+// Firebase-dependent subscriptions and auth listeners removed.
 
-// --- Added: Booking submission integration with Firebase Auth ---
-// Intercept confirmPrepay button click early (capture) to enforce auth and save booking
-(function(){
-  const btn = document.getElementById('confirmPrepayBtn');
-  if(!btn) return;
-  // guard to avoid double writes
-  window.__bookingWriteInProgress = window.__bookingWriteInProgress || false;
-  btn.addEventListener('click', async function interceptBooking(e){
-    // run during capture so we can stop if not authenticated
-    // don't prevent existing UI flow (we will let original handler run afterwards),
-    // but enforce auth and save booking to Firestore here.
-    try{
-      if(!auth || !auth.currentUser){
-        e.preventDefault();
-        alert('You must be logged in to submit a booking.');
-        return;
-      }
-      if(window.__bookingWriteInProgress) return;
-      window.__bookingWriteInProgress = true;
+// Profile UI helpers
+function initialsFromName(name){
+  if(!name) return 'U';
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if(parts.length===1) return parts[0].slice(0,2).toUpperCase();
+  return (parts[0][0] + (parts[1][0]||'')).toUpperCase();
+}
 
-      // collect booking data from form fields (prefer newly added booking inputs)
-      const customerName = (document.getElementById('bookingCustomerName')?.value?.trim())
-        || auth.currentUser.displayName
-        || auth.currentUser.email
-        || (document.getElementById('profileName')?.value || 'Anonymous');
-      const minutes = Number((document.getElementById('bookingMinutes')?.value)
-        || (document.getElementById('inputMinutes')?.value) || 0);
-      const serviceType = document.getElementById('inputTask')?.value || 'Wait in line';
-
-      if(!minutes || minutes < 1){
-        e.preventDefault();
-        alert('Please enter a valid number of minutes.');
-        window.__bookingWriteInProgress = false;
-        return;
-      }
-
-      // write booking to Firestore with required fields
-      await db.collection('bookings').add({
-        customerName: String(customerName),
-        Minutes: Number(minutes),
-        TimeStamp: firebase.firestore.FieldValue.serverTimestamp(),
-        userId: auth.currentUser.uid,
-        serviceType: serviceType
-      });
-
-      // show inline success feedback and reset form fields (non-invasive)
-      try{
-        const msg = document.getElementById('bookingMsg');
-        if(msg){ msg.textContent = 'Booking saved successfully.'; msg.className = 'muted small'; }
-        // reset fields we added
-        const elName = document.getElementById('bookingCustomerName');
-        if(elName) elName.value = '';
-        const elMin = document.getElementById('bookingMinutes');
-        if(elMin) elMin.value = '15';
-        // also reset the main form inputs for a clean form state
-        const elInputMinutes = document.getElementById('inputMinutes');
-        if(elInputMinutes) elInputMinutes.value = '20';
-        const elInputPurchase = document.getElementById('inputPurchase');
-        if(elInputPurchase) elInputPurchase.value = '0';
-        const elLocation = document.getElementById('inputLocation');
-        if(elLocation) elLocation.value = '';
-        const elTask = document.getElementById('inputTask');
-        if(elTask) elTask.value = 'wait';
-        // refresh estimate display
-        try{ updateEstimate(); }catch(e){}
-        setTimeout(()=>{ if(msg) msg.textContent = ''; }, 4000);
-      }catch(e){ console.log('Booking saved'); }
-
-    }catch(err){
-      console.error('Error saving booking:', err);
-      try{
-        const msg = document.getElementById('bookingMsg');
-        if(msg){ msg.textContent = 'Failed to save booking: ' + (err.message || err); msg.style.color = 'var(--muted)'; }
-        else alert('Failed to save booking: ' + (err.message || err));
-      }catch(e){ }
-    }finally{
-      window.__bookingWriteInProgress = false;
-    }
-  }, {capture:true});
-})();
-
-// --- Optional: display bookings for current user in `#historyList` ---
-(function(){
-  let unsubscribeUserBookings = null;
-
-  function clearHistoryList(){
-    const list = document.getElementById('historyList');
-    if(!list) return;
-    list.innerHTML = '';
+function refreshProfileUI(){
+  const avatar = document.getElementById('profileAvatar');
+  const name = document.getElementById('profileName')?.value || '';
+  if(avatar) avatar.textContent = initialsFromName(name) || 'U';
+  const bookings = loadLocalBookings();
+  const countEl = document.getElementById('bookingCount');
+  if(countEl) countEl.textContent = String(bookings.length || 0);
+  const recent = document.getElementById('profileRecent');
+  if(recent){
+    recent.innerHTML = '';
+    const slice = bookings.slice(0,5);
+    if(slice.length===0){ recent.innerHTML = '<li>No recent bookings.</li>'; }
+    slice.forEach(b=>{ const li = document.createElement('li'); li.textContent = `${b.serviceType || 'Wait'} — ${b.Minutes||0}m — ${b.customerName||''}`; recent.appendChild(li); });
   }
-
-  function renderBookingsSnapshot(snapshot){
-    const list = document.getElementById('historyList');
-    if(!list) return;
-    list.innerHTML = '';
-    if(snapshot.empty){
-      const li = document.createElement('li'); li.textContent = 'No previous bookings yet.'; list.appendChild(li); return;
-    }
-    snapshot.forEach(doc=>{
-      const d = doc.data();
-      const minutes = d.Minutes || d.minutes || 0;
-      const when = d.TimeStamp && d.TimeStamp.toDate ? d.TimeStamp.toDate().toLocaleString() : '';
-      const li = document.createElement('li');
-      li.textContent = `${d.serviceType || 'Wait in line'} — ${minutes}m — ${d.customerName || ''} ${when ? '— ' + when : ''}`;
-      list.appendChild(li);
-    });
+  // update avatar live when editing name
+  const nameInput = document.getElementById('profileName');
+  if(nameInput && !nameInput._profileBound){
+    nameInput.addEventListener('input', ()=>{ if(avatar) avatar.textContent = initialsFromName(nameInput.value); });
+    nameInput._profileBound = true;
   }
-
-  // subscribe to bookings for a user id
-  function subscribeUserBookings(uid){
-    if(unsubscribeUserBookings) unsubscribeUserBookings();
-    try{
-      unsubscribeUserBookings = db.collection('bookings')
-        .where('userId','==',uid)
-        .orderBy('TimeStamp','desc')
-        .onSnapshot(renderBookingsSnapshot, err => console.error('bookings snapshot error', err));
-    }catch(err){
-      console.warn('Could not subscribe to user bookings:', err);
-      unsubscribeUserBookings = null;
-    }
-  }
-
-  // hook into auth state to subscribe/unsubscribe
-  if(auth && typeof auth.onAuthStateChanged === 'function'){
-    auth.onAuthStateChanged(user=>{
-      if(user){ subscribeUserBookings(user.uid); }
-      else { if(unsubscribeUserBookings) unsubscribeUserBookings(); clearHistoryList(); const li = document.createElement('li'); li.textContent='No previous bookings yet.'; document.getElementById('historyList')?.appendChild(li); }
-    });
-  }
-
-})();
+}
 
