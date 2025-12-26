@@ -6,8 +6,7 @@
     <title>Waiter — Stop Waiting. Send Someone Else.</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <!-- Firebase removed — app uses localStorage for demo mode -->
 </head>
 <body>
     <button id="menuToggle" class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">☰</button>
@@ -58,24 +57,7 @@
                 <button class="icon" onclick="showScreen('profile')">👤</button>
             </header>
             <main class="content">
-                <div class="card" id="authCard" style="display:block;">
-                    <h4>Account</h4>
-                    <form id="loginForm">
-                        <label>Email
-                            <input id="loginEmail" type="email" placeholder="you@example.com" required />
-                        </label>
-                        <label>Password
-                            <input id="loginPassword" type="password" placeholder="Password" required />
-                        </label>
-                        <div class="nav-row">
-                            <button type="submit" class="cta">Log in</button>
-                        </div>
-                    </form>
-                    <div style="margin-top:8px">
-                        <button type="button" id="logoutBtn" class="ghost" style="display:none;">Log out</button>
-                    </div>
-                    <div id="authStatus" class="muted small" aria-live="polite">Not signed in</div>
-                </div>
+                <!-- Account UI removed (login/signup removed per request) -->
                 <div class="card active-booking" id="activeBookingMock" style="display:none;">
                     <h4>Active Booking</h4>
                     <div id="activeSummary">No active booking</div>
@@ -84,16 +66,11 @@
                     </div>
                 </div>
 
-                <div class="hero">
-                    <h2>Save time. Book a waiter.</h2>
-                    <p>We’ll wait, buy, or collect for you — paid per minute.</p>
-                    <button class="bookNow" onclick="showScreen('booking')">Book a Waiter</button>
+                <div style="text-align:center;margin-top:12px">
+                    <button class="cta bookNow" onclick="showScreen('booking')">Book Now</button>
                 </div>
 
-                <section class="history card">
-                    <h4>Previous bookings</h4>
-                    <ul id="historyList"><li>No previous bookings yet.</li></ul>
-                </section>
+                <!-- hero and history moved to booking page -->
             </main>
         </section>
 
@@ -105,47 +82,69 @@
                 <div></div>
             </header>
             <main class="content form">
+                <!-- Hero moved here from dashboard -->
+                <div class="hero">
+                    <h2>Save time. Book a waiter.</h2>
+                    <p>We’ll wait, buy, or collect for you — paid per minute.</p>
+                    <button class="bookNow" onclick="showScreen('booking')">Book a Waiter</button>
+                </div>
+                <div class="book-summary">
+                    <div class="left">
+                        <div class="small muted">Quick summary</div>
+                        <div class="meta">Rate per minute <strong id="ratePerMin">0.50ETB</strong></div>
+                    </div>
+                    <div class="right">
+                        <div class="small muted">Estimated</div>
+                        <div class="big" id="estimatedCost">10.00ETB</div>
+                    </div>
+                </div>
                 <!-- Added: small customer-facing booking inputs (kept in addition to existing fields) -->
-                <label>Customer name
-                    <input id="bookingCustomerName" placeholder="Your name (optional)" />
-                </label>
+                <div class="grid-two">
+                  <label>Customer name
+                      <input id="bookingCustomerName" placeholder="Your name (optional)" />
+                  </label>
 
-                <label>Minutes (quick entry)
-                    <input id="bookingMinutes" type="number" min="1" value="15" />
-                </label>
+                  <label>Minutes (quick entry)
+                      <input id="bookingMinutes" type="number" min="1" value="15" />
+                  </label>
+                </div>
 
                 <div id="bookingMsg" class="muted small" aria-live="polite" style="margin-bottom:8px"></div>
 
                 <label>Location
                     <input id="inputLocation" placeholder="Enter address or place" />
                 </label>
-
-                <label>Task Type
+                <div class="grid-two">
+                  <label>Task Type
                     <select id="inputTask">
                         <option value="wait">Stand in line</option>
                         <option value="buy">Buy something</option>
                         <option value="collect">Collect tickets</option>
                     </select>
-                </label>
 
+                  <label>Optional purchase (amount)
+                      <input id="inputPurchase" type="number" min="0" value="0" />
+                  </label>
+                </div>
                 <label>Estimated wait (minutes)
                     <input id="inputMinutes" type="number" min="5" value="20" />
                 </label>
 
-                <label>Optional purchase (amount)
-                    <input id="inputPurchase" type="number" min="0" value="0" />
-                </label>
-
                 <div class="costPreview">
-                    <div>Rate per minute: <strong id="ratePerMin">$0.50</strong></div>
-                    <div>Estimated cost: <strong id="estimatedCost">$10.00</strong></div>
+                    <div>Rate per minute: <strong id="ratePerMin">0.50ETB</strong></div>
+                    <div>Estimated cost: <strong id="estimatedCost">10.00ETB</strong></div>
                 </div>
 
                 <div class="nav-row">
                     <button class="ghost" onclick="showScreen('dashboard')">Cancel</button>
                     <button class="cta" id="confirmPrepayBtn">Confirm & Prepay</button>
                 </div>
+                <!-- Previous bookings history moved here from dashboard -->
             </main>
+            <section class="history card">
+                <h4>Previous bookings</h4>
+                <ul id="historyList"><li>No previous bookings yet.</li></ul>
+            </section>
         </section>
 
         <!-- Matching Screen -->
@@ -185,8 +184,8 @@
                     </div>
                     <div class="map" id="mapPlaceholder">Map placeholder</div>
                     <div class="row between small">
-                        <div>Cost: <strong id="liveCost">$0.00</strong></div>
-                        <div id="liveEarning">Rate: $0.50/min</div>
+                            <div>Cost: <strong id="liveCost">0.00ETB</strong></div>
+                            <div id="liveEarning">Rate: 0.50ETB/min</div>
                     </div>
                     <label>Upload proof (optional)
                         <input id="proofInput" type="file" accept="image/*" />
@@ -233,24 +232,43 @@
                 <div></div>
             </header>
             <main class="content">
-                <div class="card">
-                    <label>Name
-                        <input id="profileName" value="Jane User" />
-                    </label>
-                    <label>Contact
-                        <input id="profileContact" value="(555) 123-4567" />
-                    </label>
-                    <label>Payment (mock)
-                        <input id="profilePayment" value="**** **** **** 4242" />
-                    </label>
-                    <div class="nav-row">
-                        <button class="ghost" onclick="showScreen('dashboard')">Back</button>
-                        <button class="cta" onclick="saveProfile()">Save</button>
+                <div class="card profile-card">
+                    <div class="profile-avatar" id="profileAvatar">JU</div>
+                    <div class="profile-details">
+                        <div class="profile-row">
+                            <label>Name
+                                <input id="profileName" value="Jane User" />
+                            </label>
+                            <label>Contact
+                                <input id="profileContact" value="(555) 123-4567" />
+                            </label>
+                            <label>Payment (mock)
+                                <input id="profilePayment" value="**** **** **** 4242" />
+                            </label>
+                        </div>
+                        <div class="nav-row">
+                            <button class="ghost" onclick="showScreen('dashboard')">Back</button>
+                            <button class="cta" onclick="saveProfile()">Save</button>
+                        </div>
                     </div>
+                    <aside class="profile-side">
+                        <div class="profile-stat">
+                            <div class="stat-value" id="profileRating">4.9</div>
+                            <div class="stat-label">Rating</div>
+                        </div>
+                        <div class="profile-stat">
+                            <div class="stat-value" id="bookingCount">0</div>
+                            <div class="stat-label">Bookings</div>
+                        </div>
+                    </aside>
+                </div>
+                <div class="card">
+                    <h4>Recent bookings</h4>
+                    <ul id="profileRecent" class="muted small"><li>No recent bookings.</li></ul>
                 </div>
                 <div class="card">
                     <h4>Wallet</h4>
-                    <div>Balance: <strong id="walletBalance">$50.00</strong></div>
+                    <div>Balance: <strong id="walletBalance">50.00ETB</strong></div>
                 </div>
             </main>
         </section>
@@ -284,27 +302,87 @@
             <main class="content">
                 <div class="card">
                     <h4>Terms of Service</h4>
-                    <p>Placeholder terms. Replace with your legal text.</p>
+                    <p>1. Introduction
+We value your privacy. This Privacy Policy explains how we collect, use, and protect your personal information when you use our website and services.
+
+2. Information We Collect
+
+Personal Information: Name, email, payment details, and location you provide when booking a service.
+
+Usage Information: Data about how you interact with our website, including IP address, browser type, and pages visited.
+
+3. How We Use Your Information
+
+To provide and improve our services.
+
+To communicate with you about bookings, updates, and promotions.
+
+To prevent fraud and ensure security.
+
+4. Sharing Your Information
+We do not sell your personal data. We may share information with trusted service providers (e.g., payment processors) to fulfill bookings.
+
+5. Data Security
+We implement reasonable measures to protect your data, including encryption and secure storage.
+
+6. Your Rights
+You can access, update, or delete your personal information by contacting us.
+
+7. Changes to this Policy
+We may update this policy occasionally. The updated version will be posted on this page.
+
+8. Contact Us
+For questions about this policy, email: waiterapp101@gmail.com .</p>
                     <h4>Privacy Policy</h4>
-                    <p>Placeholder privacy policy. Replace before launch.</p>
+                    <p>Effective Date: December 26, 2025
+
+1. Acceptance of Terms
+By using our website or services, you agree to these Terms of Service.
+
+2. Services Provided
+We provide a platform to book individuals to wait, buy, or collect on your behalf, paid per minute.
+
+3. User Responsibilities
+
+You must provide accurate information when creating an account or booking.
+
+You are responsible for any content you submit.
+
+Payments must be completed before or during service as required.
+
+4. Restrictions
+You may not:
+
+Use the service for illegal activities.
+
+Attempt to disrupt or hack the website.
+
+5. Cancellation & Refunds
+Booking cancellations and refunds follow the rules set on the website at the time of booking.
+
+6. Liability
+We are not liable for losses, damages, or delays caused by third-party service providers or events beyond our control.
+
+7. Modifications
+We may update these Terms at any time. Continued use constitutes acceptance of changes.
+
+8. Governing Law
+These Terms are governed by the laws of Ethiopia.
+
+9. Contact
+Questions regarding these Terms can be sent to: waiterapp101@gmail.com.
+</p>
                 </div>
             </main>
         </section>
     </div>
 
-    <nav id="mobileMenu" class="mobile-menu" aria-hidden="true" role="menu">
+        <nav id="mobileMenu" class="mobile-menu" aria-hidden="true" role="menu">
         <button class="mobile-item" role="menuitem" onclick="showScreen('dashboard');toggleMenu(false)">Home</button>
         <button class="mobile-item" role="menuitem" onclick="showScreen('booking');toggleMenu(false)">Book</button>
         <button class="mobile-item" role="menuitem" onclick="showScreen('support');toggleMenu(false)">Help</button>
-        <button class="mobile-item" id="menuThemeToggle" role="menuitem" onclick="toggleTheme();">Toggle theme</button>
     </nav>
     <div id="menuBackdrop" class="menu-backdrop" tabindex="-1" onclick="toggleMenu(false)"></div>
-    <script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script defer src="app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
-
