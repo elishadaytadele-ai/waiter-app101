@@ -65,6 +65,10 @@ button:active{transform:scale(.995)}
 .book-summary .left{flex:1}
 .book-summary .right{text-align:right;min-width:110px}
 .book-summary .right .big{font-weight:700;font-size:18px;color:var(--primary)}
+.logo2 {
+  height: 256px;
+  width: auto;
+  margin-right: 16px;}
 /* Make sure the map container has proper height & rounded corners */
 .map {
     height: 300px;
