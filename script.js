@@ -277,6 +277,63 @@ function saveProfile(){
   showScreen('dashboard');
 }
 
+// Initialize map with a fallback
+let map = null;
+let waiterMarker = null;
+let mapInitialized = false;
+
+function initLiveMap(lat, lng) {
+  if (mapInitialized) return;
+
+  map = L.map('mapPlaceholder').setView([lat, lng], 16);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  waiterMarker = L.marker([lat, lng]).addTo(map);
+
+  mapInitialized = true;
+
+  // Fix partial loading when screen becomes visible
+  setTimeout(() => {
+    map.invalidateSize();
+  }, 300);
+}
+
+function updateWaiterMarker(lat, lng) {
+  if (!mapInitialized) {
+    initLiveMap(lat, lng);
+    return;
+  }
+
+  waiterMarker.setLatLng([lat, lng]);
+  map.panTo([lat, lng]);
+}
+function startLive() {
+  showScreen('live');
+
+  if (!navigator.geolocation) {
+    console.error('Geolocation not supported');
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const { latitude, longitude } = pos.coords;
+      updateWaiterMarker(latitude, longitude);
+    },
+    err => {
+      console.error('Geolocation error:', err);
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000
+    }
+  );
+}
+
 // Expose commonly-used functions to the global scope so inline handlers work reliably
 window.showScreen = showScreen;
 window.confirmPrepay = confirmPrepay;
