@@ -9,6 +9,7 @@
     <!-- Firebase removed — app uses localStorage for demo mode -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="icon" href="assets/logo.png">
 </head>
 <body>
     <script>
@@ -28,7 +29,9 @@
         <!-- Splash -->
         <section id="splash" class="screen active">
             <div class="center">
-                <div class="logo">🕒</div>
+                <div class="logo">
+                     <img src="assets/logo.png" alt="App logo" class="logo2">
+                </div>
                 <h1 class="title">Stop Waiting.</h1>
                 <p class="tagline">Send Someone Else.</p>
                 <button class="cta" onclick="showScreen('onboard1')">Get Started</button>
@@ -166,13 +169,13 @@
                 <h3>Matching you with a waiter</h3>
                 <p class="muted">This usually takes a few moments.</p>
                 <div class="waiterCard">
-                    <img src="https://via.placeholder.com/72" alt="waiter" />
+                    <img src="assets/waiterpfp.jpg" alt="waiter" />
                     <div>
                         <div class="name" id="waiterName">—</div>
                         <div class="meta" id="waiterMeta">Rating • Jobs</div>
                     </div>
                 </div>
-                <div class="loader">Searching…</div>
+                <div class="loader">assigning…</div>
                 <div class="nav-row">
                     <button class="ghost" onclick="showScreen('dashboard')">Cancel</button>
                 </div>
