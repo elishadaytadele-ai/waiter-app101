@@ -7,8 +7,21 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <!-- Firebase removed — app uses localStorage for demo mode -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
+    <script>
+        // Early no-op placeholders so inline onclicks don't throw before script.js loads
+        window.showScreen = window.showScreen || function(){ console.warn('showScreen called before app loaded'); };
+        window.confirmPrepay = window.confirmPrepay || function(){ console.warn('confirmPrepay called before app loaded'); };
+        window.endBooking = window.endBooking || function(){ console.warn('endBooking called before app loaded'); };
+        window.setRating = window.setRating || function(){ console.warn('setRating called before app loaded'); };
+        window.submitRating = window.submitRating || function(){ console.warn('submitRating called before app loaded'); };
+        window.saveProfile = window.saveProfile || function(){ console.warn('saveProfile called before app loaded'); };
+        window.toggleTheme = window.toggleTheme || function(){ console.warn('toggleTheme called before app loaded'); };
+        window.toggleMenu = window.toggleMenu || function(){ console.warn('toggleMenu called before app loaded'); };
+    </script>
     <button id="menuToggle" class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">☰</button>
     <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
     <div id="app">
@@ -168,36 +181,45 @@
 
         <!-- Live Tracking -->
         <section id="live" class="screen">
-            <header class="header">
-                <button class="icon" onclick="showScreen('dashboard')">←</button>
-                <h3>Live Tracking</h3>
-                <div></div>
-            </header>
-            <main class="content">
-                <div class="tracker card">
-                    <div class="row between">
-                        <div>
-                            <div id="liveWaiterName">—</div>
-                            <div class="muted" id="liveWaiterStatus">Arriving</div>
-                        </div>
-                        <div class="timer" id="liveTimer">00:00</div>
-                    </div>
-                    <div class="map" id="mapPlaceholder">Map placeholder</div>
-                    <div class="row between small">
-                            <div>Cost: <strong id="liveCost">0.00ETB</strong></div>
-                            <div id="liveEarning">Rate: 0.50ETB/min</div>
-                    </div>
-                    <label>Upload proof (optional)
-                        <input id="proofInput" type="file" accept="image/*" />
-                    </label>
-                    <div class="row">
-                        <button class="ghost" onclick="endBooking(true)">Finish</button>
-                        <button class="cta" onclick="endBooking(false)">Complete & Pay</button>
-                    </div>
+    <header class="header">
+        <button class="icon" onclick="showScreen('dashboard')">←</button>
+        <h3>Live Tracking</h3>
+        <div></div>
+    </header>
+    <main class="content">
+        <div class="tracker card">
+            <!-- Waiter info & timer -->
+            <div class="row between">
+                <div>
+                    <div id="liveWaiterName">—</div>
+                    <div class="muted" id="liveWaiterStatus">Arriving</div>
                 </div>
-            </main>
-        </section>
+                <div class="timer" id="liveTimer">00:00</div>
+            </div> 
+            <!-- Map -->
+<div id="mapPlaceholder" class="map"style="height: 500px; width: 100%; border-radius:12px; margin: 12px 0;"> Map loading...</div>
 
+            <!-- Cost & Rate -->
+            <div class="row between small">
+                <div>Cost: <strong id="liveCost">0.00ETB</strong></div>
+                <div id="liveEarning">Rate: 0.50ETB/min</div>
+            </div>
+
+            <!-- Proof upload -->
+            <label>Upload proof (optional)
+                <input id="proofInput" type="file" accept="image/*" />
+            </label>
+
+            <!-- Action buttons -->
+            <div class="row">
+                <button class="ghost" onclick="endBooking(true)">Finish</button>
+                <button class="cta" onclick="endBooking(false)">Complete & Pay</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Leaflet initialization removed (handled once in script.js) -->
+</section>
         <!-- Completion -->
         <section id="complete" class="screen">
             <div class="center">
