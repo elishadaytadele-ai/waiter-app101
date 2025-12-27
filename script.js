@@ -192,37 +192,60 @@ function confirmPrepay(){
   }catch(err){ console.error('Failed to save booking locally:', err); }
   setTimeout(()=>{
     // fake waiter
-    const waiter = {name:'Alex P.',rating:4.8,jobs:142,img:'https://via.placeholder.com/72'};
+    const waiter = {name:'Alex P.',rating:4.8,jobs:142,img:'assets/waiterpfp.jpg'};
     const img = document.querySelector('#matching .waiterCard img');
     if(img) img.src = waiter.img;
     document.getElementById('waiterName').textContent = waiter.name;
     document.getElementById('waiterMeta').textContent = `${waiter.rating} • ${waiter.jobs} jobs`;
     // if user was viewing matching, switch to live view now that waiter found
-    showScreen('live');
+    startLive(currentBooking);
   },800);
 }
 
-function startLive(booking){
+function startLive(booking) {
+  if (booking.started) return; // prevent double start
+
   booking.started = true;
   booking.startTs = Date.now();
-  booking.seconds = 0;
   liveSeconds = 0;
+
   showScreen('live');
-  // populate live UI
+
+  // UI
   document.getElementById('liveWaiterName').textContent = 'Alex P.';
   document.getElementById('liveWaiterStatus').textContent = 'Arriving';
-  document.getElementById('liveEarning').textContent = `Rate: ${RATE_PER_MIN.toFixed(2)}ETB/min`;
-  updateLiveCost();
-  if(liveTimerId) clearInterval(liveTimerId);
-  liveTimerId = setInterval(()=>{
+  document.getElementById('liveEarning').textContent =
+    `Rate: ${RATE_PER_MIN.toFixed(2)}ETB/min`;
+
+  // TIMER (authoritative)
+  if (liveTimerId) clearInterval(liveTimerId);
+  liveTimerId = setInterval(() => {
     liveSeconds++;
-    document.getElementById('liveTimer').textContent = formatTime(liveSeconds);
+    document.getElementById('liveTimer').textContent =
+      formatTime(liveSeconds);
     updateLiveCost();
-    // update status slightly
-    if(liveSeconds===10) document.getElementById('liveWaiterStatus').textContent='Waiting';
-    if(liveSeconds===30) document.getElementById('liveWaiterStatus').textContent='Completing';
-  },1000);
+
+    if (liveSeconds === 10)
+      document.getElementById('liveWaiterStatus').textContent = 'Waiting';
+    if (liveSeconds === 30)
+      document.getElementById('liveWaiterStatus').textContent = 'Completing';
+  }, 1000);
+
+  // GEOLOCATION
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        updateWaiterMarker(pos.coords.latitude, pos.coords.longitude);
+      },
+      err => console.error('Geolocation error:', err),
+      { enableHighAccuracy: true }
+    );
+  }
+
+  // Fix map resize
+  setTimeout(() => map?.invalidateSize(), 300);
 }
+
 
 function updateLiveCost(){
   const minutes = liveSeconds/60;
@@ -311,28 +334,35 @@ function updateWaiterMarker(lat, lng) {
   waiterMarker.setLatLng([lat, lng]);
   map.panTo([lat, lng]);
 }
-function startLive() {
-  showScreen('live');
 
-  if (!navigator.geolocation) {
-    console.error('Geolocation not supported');
-    return;
-  }
+let liveStartTime = null;
+let liveTimerInterval = null;
 
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      const { latitude, longitude } = pos.coords;
-      updateWaiterMarker(latitude, longitude);
-    },
-    err => {
-      console.error('Geolocation error:', err);
-    },
-    {
-      enableHighAccuracy: true,
-      timeout: 10000
-    }
-  );
+function startLiveTimer() {
+    if (liveTimerInterval) return; // prevent duplicates
+
+    liveStartTime = Date.now();
+
+    liveTimerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - liveStartTime) / 1000);
+
+        const minutes = String(Math.floor(elapsed / 60)).padStart(2, '0');
+        const seconds = String(elapsed % 60).padStart(2, '0');
+
+        document.getElementById('liveTimer').textContent =
+            `${minutes}:${seconds}`;
+
+        updateLiveCost(elapsed);
+    }, 1000);
 }
+function updateLiveCost(seconds) {
+    const ratePerMinute = 0.5;
+    const cost = (seconds / 60) * ratePerMinute;
+
+    document.getElementById('liveCost').textContent =
+        cost.toFixed(2) + ' ETB';
+}
+
 
 // Expose commonly-used functions to the global scope so inline handlers work reliably
 window.showScreen = showScreen;
