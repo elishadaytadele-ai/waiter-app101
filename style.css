@@ -56,7 +56,7 @@ button:active{transform:scale(.995)}
 .header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px}
 .icon{background:transparent;border:none;font-size:18px;color:var(--text)}
 .content{max-width:720px;margin:12px auto}
-.hero{background:linear-gradient(180deg, var(--surface) 0%, rgba(255,255,255,0.02) 100%);padding:18px;border-radius:12px;margin-bottom:16px;border:1px solid var(--border)}
+.hero{background:linear-gradient(180deg, var(--surface) 0%, rgba(0,0,0,0.02) 100%);padding:18px;border-radius:12px;margin-bottom:16px;border:1px solid var(--border)}
 .bookNow{background:var(--primary);color:#fff;padding:12px 16px;border-radius:10px;border:none;box-shadow:0 6px 14px rgba(46,134,171,0.12);transition:transform .36s cubic-bezier(.2,.9,.2,1),box-shadow .36s}
 .bookNow:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 16px 28px rgba(46,134,171,0.12)}
 .card{background:var(--card);padding:14px;border-radius:12px;margin-bottom:12px;border:1px solid var(--border);color:var(--text)}
@@ -65,6 +65,46 @@ button:active{transform:scale(.995)}
 .book-summary .left{flex:1}
 .book-summary .right{text-align:right;min-width:110px}
 .book-summary .right .big{font-weight:700;font-size:18px;color:var(--primary)}
+/* Make sure the map container has proper height & rounded corners */
+.map {
+    height: 300px;
+    width: 100%;
+    border-radius: 12px;
+    margin: 12px 0;
+}
+
+/* Tracker card tweaks */
+.tracker.card {
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  background: var(--card);
+}
+
+/* Timer styling */
+.timer {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+/* Row tweaks for spacing */
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+/* Small text spacing */
+.row.small {
+    font-size: 0.9rem;
+}
+
+/* Buttons inside tracker */
+.tracker .row button {
+    margin-right: 8px;
+}
+
 
 /* two-column grid for booking form inputs */
 .form .grid-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -174,5 +214,6 @@ button:active{transform:scale(.995)}
 .meta{font-size:13px;color:var(--muted)}
 
 h1 {
-    color: #1E3A8A;
+  /* Use theme-aware text color rather than a fixed blue so headings follow theme */
+  color: var(--text);
 }
