@@ -1,4 +1,31 @@
 /* Firebase removed — lightweight local/demo storage used instead */
+const firebaseConfig = {
+  apiKey: "AIzaSyBfYtxWYiTOAGDN7-mEM_Vq-LCeNOVx6oQ",
+  authDomain: "waiter-app101.firebaseapp.com",
+  projectId: "waiter-app101",
+  storageBucket: "waiter-app101.firebasestorage.app",
+  messagingSenderId: "451129298666",
+  appId: "1:451129298666:web:c48799cb276da1f18dd193"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+firebase.firestore()
+  .collection("test")
+  .doc("ping")
+  .set({ ok: true })
+  .then(() => {
+    console.log("Firebase is working");
+  })
+  .catch(() => {
+    console.log("Firebase is NOT working");
+  });
+
+
+
 const BOOKINGS_KEY = 'wa_bookings';
 
 function loadLocalBookings(){
@@ -36,6 +63,7 @@ let liveTimerId = null;
 let liveSeconds = 0;
 let currentBooking = null;
 let selectedPaymentMethod = null;
+let currentBookingId = null;
 
 function showScreen(id){
   const duration = 60; // match CSS transition (ms)
@@ -245,6 +273,28 @@ function startLive(booking) {
   liveSeconds = 0;
 
   showScreen('live');
+  function confirmBooking() {
+  const booking = {
+    location: selectedLocation,
+    task: selectedTask,
+    minutes: selectedMinutes,
+    purchase: totalPrice,
+    status: "booked",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    proofUrl: ""
+  };
+
+  db.collection("bookings")
+    .add(booking)
+    .then(docRef => {
+      currentBookingId = docRef.id;
+      console.log("Booking saved:", currentBookingId);
+    })
+    .catch(err => {
+      console.error("Booking failed:", err);
+    });
+}
+
 
   // UI
   document.getElementById('liveWaiterName').textContent = 'Alex P.';
@@ -385,6 +435,27 @@ function submitRating(){
 function saveProfile(){
   alert('Profile saved');
   showScreen('dashboard');
+}
+function completeBooking(file) {
+  const storageRef = storage.ref();
+  const proofRef = storageRef.child(`proofs/${currentBookingId}.jpg`);
+
+  proofRef.put(file)
+    .then(snapshot => snapshot.ref.getDownloadURL())
+    .then(url => {
+      return db.collection("bookings")
+        .doc(currentBookingId)
+        .update({
+          status: "completed",
+          proofUrl: url
+        });
+    })
+    .then(() => {
+      console.log("Booking completed");
+    })
+    .catch(err => {
+      console.error("Completion failed:", err);
+    });
 }
 
 // Initialize map with a fallback
