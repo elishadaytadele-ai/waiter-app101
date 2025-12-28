@@ -25,7 +25,7 @@ function renderLocalHistory(){
   });
 }
 // Simple frontend prototype logic for booking, matching, live tracking, and rating
-const RATE_PER_MIN = 0.5;
+const RATE_PER_MIN = 2;
 // Defensive placeholders for inline handlers (avoid "undefined" during early clicks)
 if(!window.showScreen) window.showScreen = (...args)=>{ console.warn('showScreen called before init', ...args); };
 if(!window.endBooking) window.endBooking = (...args)=>{ console.warn('endBooking called before init', ...args); };
@@ -35,6 +35,7 @@ if(!window.saveProfile) window.saveProfile = (...args)=>{ console.warn('saveProf
 let liveTimerId = null;
 let liveSeconds = 0;
 let currentBooking = null;
+let selectedPaymentMethod = null;
 
 function showScreen(id){
   const duration = 60; // match CSS transition (ms)
@@ -61,6 +62,26 @@ function showScreen(id){
     try{ window.scrollTo(0,0); }catch(e){}
   }
 }
+function showPaymentOptions(){
+  const paymentDiv = document.getElementById('paymentOptions');
+  if(!paymentDiv) return;
+  const active = document.querySelector('.screen.active');
+  // If we're not on the dashboard, navigate there first so the panel is visible
+  if(active && active.id !== 'dashboard'){
+    showScreen('dashboard');
+    // allow the screen transition to complete so the element becomes visible
+    setTimeout(()=>{ paymentDiv.style.display = 'block'; }, 120);
+  } else {
+    paymentDiv.style.display = 'block';
+  }
+}
+
+function selectPayment(method){
+  selectedPaymentMethod = method;
+
+  document.getElementById('paymentOptions').style.display = 'none';
+  document.getElementById('proofSection').style.display = 'block';
+}
 
 // Booking form interactions
 const inputMinutes = () => document.getElementById('inputMinutes');
@@ -72,9 +93,7 @@ function updateEstimate(){
   document.getElementById('estimatedCost').textContent = `${est.toFixed(2)}ETB`;
   document.getElementById('ratePerMin').textContent = `${RATE_PER_MIN.toFixed(2)}ETB`;
 }
-
-document.addEventListener('DOMContentLoaded',()=>{
-  updateEstimate();
+  document.addEventListener('DOMContentLoaded', () => {restoreLiveState();
   document.getElementById('inputMinutes')?.addEventListener('input',updateEstimate);
   document.getElementById('inputPurchase')?.addEventListener('input',updateEstimate);
   document.getElementById('confirmPrepayBtn')?.addEventListener('click',confirmPrepay);
@@ -94,6 +113,22 @@ document.addEventListener('DOMContentLoaded',()=>{
   // update profile UI (avatar initials, booking count, recent bookings)
   if(typeof refreshProfileUI === 'function') refreshProfileUI();
 });
+function restoreLiveState() {
+  const saved = localStorage.getItem('wa_live_state');
+  if (!saved) return;
+
+  try {
+    const { booking, liveSeconds: savedSeconds, isLive } = JSON.parse(saved);
+    if (!isLive || !booking) return;
+
+    currentBooking = booking;
+    liveSeconds = savedSeconds;
+
+    startLive(currentBooking);
+  } catch (e) {
+    console.error('Failed to restore live state', e);
+  }
+}
 
 // THEME: light/dark toggle with persistence
 function applyTheme(theme){
@@ -218,18 +253,18 @@ function startLive(booking) {
     `Rate: ${RATE_PER_MIN.toFixed(2)}ETB/min`;
 
   // TIMER (authoritative)
-  if (liveTimerId) clearInterval(liveTimerId);
-  liveTimerId = setInterval(() => {
-    liveSeconds++;
-    document.getElementById('liveTimer').textContent =
-      formatTime(liveSeconds);
-    updateLiveCost();
+ liveTimerId = setInterval(() => {
+  liveSeconds++;
+  document.getElementById('liveTimer').textContent =
+    formatTime(liveSeconds);
+  updateLiveCost();
+  persistLiveState();
+  if (liveSeconds === 10)
+    document.getElementById('liveWaiterStatus').textContent = 'Waiting';
+  if (liveSeconds === 30)
+    document.getElementById('liveWaiterStatus').textContent = 'Completing';
+}, 1000);
 
-    if (liveSeconds === 10)
-      document.getElementById('liveWaiterStatus').textContent = 'Waiting';
-    if (liveSeconds === 30)
-      document.getElementById('liveWaiterStatus').textContent = 'Completing';
-  }, 1000);
 
   // GEOLOCATION
   if (navigator.geolocation) {
@@ -245,25 +280,77 @@ function startLive(booking) {
   // Fix map resize
   setTimeout(() => map?.invalidateSize(), 300);
 }
-
-
 function updateLiveCost(){
-  const minutes = liveSeconds/60;
-  const cost = (minutes * RATE_PER_MIN) + (currentBooking?.purchase||0) || 0;
-  document.getElementById('liveCost').textContent = `${cost.toFixed(2)}ETB`;
-}
+  const minutes = liveSeconds / 60;
+  const cost =
+    (minutes * RATE_PER_MIN) +
+    (currentBooking?.purchase || 0);
 
-function endBooking(finishWithoutPay=false){
-  // stop timer and show completion
-  if(liveTimerId) clearInterval(liveTimerId);
-  const totalMinutes = Math.max(1, Math.ceil(liveSeconds/60));
-  const workCost = totalMinutes * RATE_PER_MIN;
-  const finalCost = workCost + (currentBooking?.purchase||0);
-  document.getElementById('finalSummary').textContent = `Total: ${finalCost.toFixed(2)}ETB — ${totalMinutes} minute(s)`;
-  // save to history
-  addToHistory({id:currentBooking.id,cost:finalCost,minutes:totalMinutes,task:currentBooking.task});
+  document.getElementById('liveCost').textContent =
+    `${cost.toFixed(2)}ETB`;
+}
+function endBooking() {
+  // Try to find a proof file input in several places (robust to id mismatches)
+  let proofFile = null;
+  const proofEl = document.getElementById('proofInput') || document.getElementById('proofInputDashboard') || document.querySelector('#proofSection input[type="file"]');
+  if (proofEl && proofEl.files && proofEl.files.length > 0) proofFile = proofEl.files[0];
+
+  if (!selectedPaymentMethod) {
+    alert('Select a payment method first.');
+    return;
+  }
+
+  if (!proofFile) {
+    alert('Upload proof first.');
+    return;
+  }
+
+  // Optional: stop live timer (only if relevant)
+  if (liveTimerId) clearInterval(liveTimerId);
+
+  // Calculate final cost
+  const totalMinutes = Math.max(1, Math.ceil(liveSeconds / 60));
+  const finalCost =
+    (totalMinutes * RATE_PER_MIN) +
+    (currentBooking?.purchase || 0);
+
+  document.getElementById('finalSummary').textContent =
+    `Paid via ${selectedPaymentMethod} — ${finalCost.toFixed(2)}ETB — ${totalMinutes} minute(s)`;
+
+  // Clean up payment UI
+  selectedPaymentMethod = null;
+  const paymentDiv = document.getElementById('paymentOptions');
+  if (paymentDiv) paymentDiv.style.display = 'none';
+  const proofSection = document.getElementById('proofSection');
+  if (proofSection) proofSection.style.display = 'none';
+  const proofInputEl = document.getElementById('proofInput') || document.querySelector('#proofSection input[type="file"]');
+  if (proofInputEl) proofInputEl.value = '';
+
+  // Go to completion screen
   showScreen('complete');
 }
+function showPaymentOptions() {
+  const paymentDiv = document.getElementById('paymentOptions');
+  const activeBooking = document.getElementById('activeBookingMock');
+  if (!paymentDiv) return;
+
+  // Ensure the active booking card is visible so its children can be shown
+  if (activeBooking) activeBooking.style.display = 'block';
+
+  const active = document.querySelector('.screen.active');
+  if (active && active.id !== 'dashboard') {
+    showScreen('dashboard');
+    // allow the screen transition to complete before showing the panel
+    setTimeout(() => { paymentDiv.style.display = 'block'; }, 140);
+  } else {
+    paymentDiv.style.display = 'block';
+  }
+}
+function selectPayment(method) {
+  selectedPaymentMethod = method;
+  document.getElementById('proofSection').style.display = 'block';
+}
+
 
 function addToHistory(entry){
   const list = document.getElementById('historyList');
@@ -335,32 +422,12 @@ function updateWaiterMarker(lat, lng) {
   map.panTo([lat, lng]);
 }
 
-let liveStartTime = null;
-let liveTimerInterval = null;
-
-function startLiveTimer() {
-    if (liveTimerInterval) return; // prevent duplicates
-
-    liveStartTime = Date.now();
-
-    liveTimerInterval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - liveStartTime) / 1000);
-
-        const minutes = String(Math.floor(elapsed / 60)).padStart(2, '0');
-        const seconds = String(elapsed % 60).padStart(2, '0');
-
-        document.getElementById('liveTimer').textContent =
-            `${minutes}:${seconds}`;
-
-        updateLiveCost(elapsed);
-    }, 1000);
-}
-function updateLiveCost(seconds) {
-    const ratePerMinute = 0.5;
-    const cost = (seconds / 60) * ratePerMinute;
-
-    document.getElementById('liveCost').textContent =
-        cost.toFixed(2) + ' ETB';
+function persistLiveState() {
+  localStorage.setItem('wa_live_state', JSON.stringify({
+    booking: currentBooking,
+    liveSeconds,
+    isLive: true
+  }));
 }
 
 
