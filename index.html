@@ -77,9 +77,27 @@
                 <div class="card active-booking" id="activeBookingMock" style="display:none;">
                     <h4>Active Booking</h4>
                     <div id="activeSummary">No active booking</div>
-                    <div class="row">
-                        <button class="ghost" onclick="showScreen('live')">Track</button>
-                    </div>
+                   <div class="row">
+  <button id="proofInputDashboard" class="cta" onclick="showPaymentOptions()">Complete & Pay</button>
+</div>
+
+<div id="paymentOptions" class="card" style="display:none; margin-top:12px;">
+  <h4>Select payment method</h4>
+  <button class="ghost" onclick="selectPayment('CBE 1000151730217')">
+    CBE • 1000151730217
+  </button>
+  <button class="ghost" onclick="selectPayment('Telebirr +251913386974')">
+    Telebirr • +251913386974
+  </button>
+</div>
+
+<div id="proofSection" style="display:none; margin-top:12px;">
+  <label>Upload payment proof
+    <input id="proofInput" type="file" accept="image/*" required />
+  </label>
+  <button class="cta" onclick="endBooking()">Confirm & Finish</button>
+</div>
+
                 </div>
 
                 <div style="text-align:center;margin-top:12px">
@@ -107,7 +125,7 @@
                 <div class="book-summary">
                     <div class="left">
                         <div class="small muted">Quick summary</div>
-                        <div class="meta">Rate per minute <strong id="ratePerMin">0.50ETB</strong></div>
+                        <div class="meta">Rate per minute <strong id="ratePerMin">2.00ETB</strong></div>
                     </div>
                     <div class="right">
                         <div class="small muted">Estimated</div>
@@ -147,7 +165,7 @@
                 </label>
 
                 <div class="costPreview">
-                    <div>Rate per minute: <strong id="ratePerMin">0.50ETB</strong></div>
+                    <div>Rate per minute: <strong id="ratePerMin">2.00ETB</strong></div>
                     <div>Estimated cost: <strong id="estimatedCost">10.00ETB</strong></div>
                 </div>
 
@@ -205,19 +223,12 @@
             <!-- Cost & Rate -->
             <div class="row between small">
                 <div>Cost: <strong id="liveCost">0.00ETB</strong></div>
-                <div id="liveEarning">Rate: 0.50ETB/min</div>
+                <div id="liveEarning">Rate: 2.00ETB/min</div>
             </div>
-
-            <!-- Proof upload -->
-            <label>Upload proof (optional)
-                <input id="proofInput" type="file" accept="image/*" />
-            </label>
-
             <!-- Action buttons -->
             <div class="row">
-                <button class="ghost" onclick="endBooking(true)">Finish</button>
-                <button class="cta" onclick="endBooking(false)">Complete & Pay</button>
-            </div>
+  <button class="cta" onclick="showPaymentOptions()">Complete & Pay</button>
+</div>
         </div>
     </main>
 
