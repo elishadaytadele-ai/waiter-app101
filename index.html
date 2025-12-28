@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="icon" href="assets/logo.png">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 </head>
 <body>
     <script>
@@ -23,6 +26,26 @@
         window.toggleTheme = window.toggleTheme || function(){ console.warn('toggleTheme called before app loaded'); };
         window.toggleMenu = window.toggleMenu || function(){ console.warn('toggleMenu called before app loaded'); };
     </script>
+    <input type="file" id="fileTest">
+<button onclick="uploadTest()">Upload</button>
+
+<script>
+function uploadTest() {
+  const file = document.getElementById("fileTest").files[0];
+  if (!file) return console.log("No file selected");
+
+  // Create a reference with timestamped filename
+  const storageRef = storage.ref(`test/${Date.now()}_${file.name}`);
+
+  storageRef.put(file)
+    .then(snapshot => snapshot.ref.getDownloadURL())
+    .then(url => {
+      console.log("Storage is working! File URL:", url);
+    })
+    .catch(err => console.error("Storage failed:", err));
+}
+</script>
+
     <button id="menuToggle" class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">☰</button>
     <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
     <div id="app">
