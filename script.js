@@ -134,6 +134,19 @@ function updateEstimate(){
   const __backdropInit = document.getElementById('menuBackdrop');
   if(__backdropInit) __backdropInit.style.display = 'none';
   document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') toggleMenu(false); });
+  // delegated handler for mobile menu items: use data-target attributes
+  const __mobileMenu = document.getElementById('mobileMenu');
+  if(__mobileMenu && !__mobileMenu._menuBound){
+    __mobileMenu.addEventListener('click', (ev)=>{
+      const btn = ev.target.closest('.mobile-item');
+      if(!btn) return;
+      const target = btn.dataset && btn.dataset.target;
+      if(target) showScreen(target);
+      // ensure menu closes after navigation
+      toggleMenu(false);
+    });
+    __mobileMenu._menuBound = true;
+  }
   // ensure menu theme button mirrors main theme
   // (menuThemeToggle removed from menu; top theme toggle remains)
   // render local history (if any)
@@ -206,7 +219,19 @@ function toggleMenu(open){
     if(toggle) toggle.setAttribute('aria-expanded','true');
     if(menu) menu.setAttribute('aria-hidden','false');
     if(backdrop) backdrop.style.display='block';
+    // move focus into the menu for keyboard users (focus first item)
+    try{
+      const first = menu?.querySelector('.mobile-item');
+      if(first) first.focus();
+    }catch(e){}
   } else {
+    // If a descendant currently has focus, move focus back to the toggle
+    try{
+      if(menu && menu.contains(document.activeElement)){
+        if(toggle) toggle.focus();
+        else document.body.focus();
+      }
+    }catch(e){}
     document.documentElement.removeAttribute('data-menu');
     if(toggle) toggle.setAttribute('aria-expanded','false');
     if(menu) menu.setAttribute('aria-hidden','true');
@@ -255,7 +280,7 @@ function confirmPrepay(){
   }catch(err){ console.error('Failed to save booking locally:', err); }
   setTimeout(()=>{
     // fake waiter
-    const waiter = {name:'Alex P.',rating:4.8,jobs:142,img:'assets/waiterpfp.jpg'};
+    const waiter = {name:'Chaltu',rating:4.8,jobs:142,img:'assets/waiterpfp.jpg'};
     const img = document.querySelector('#matching .waiterCard img');
     if(img) img.src = waiter.img;
     document.getElementById('waiterName').textContent = waiter.name;
