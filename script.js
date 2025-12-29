@@ -1,31 +1,3 @@
-/* Firebase removed — lightweight local/demo storage used instead */
-const firebaseConfig = {
-  apiKey: "AIzaSyBfYtxWYiTOAGDN7-mEM_Vq-LCeNOVx6oQ",
-  authDomain: "waiter-app101.firebaseapp.com",
-  projectId: "waiter-app101",
-  storageBucket: "waiter-app101.firebasestorage.app",
-  messagingSenderId: "451129298666",
-  appId: "1:451129298666:web:c48799cb276da1f18dd193"
-};
-
-firebase.initializeApp(firebaseConfig);
-
-const db = firebase.firestore();
-const storage = firebase.storage();
-
-firebase.firestore()
-  .collection("test")
-  .doc("ping")
-  .set({ ok: true })
-  .then(() => {
-    console.log("Firebase is working");
-  })
-  .catch(() => {
-    console.log("Firebase is NOT working");
-  });
-
-
-
 const BOOKINGS_KEY = 'wa_bookings';
 
 function loadLocalBookings(){
@@ -570,4 +542,5 @@ function refreshProfileUI(){
     nameInput._profileBound = true;
   }
 }
+
 
