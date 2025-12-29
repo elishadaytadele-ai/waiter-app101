@@ -1,35 +1,35 @@
 /* Light / Dark theme variables and defaults (mobile-first) */
 :root{
-  /* Palette (light theme) */
-  --primary: #2E86AB;        /* Deep ocean blue */
-  --secondary: #8AB6D6;      /* Light sky blue */
-  --accent: #F4D35E;         /* Warm gold */
-  --bg: #F0F4F8;             /* Light gray-blue background */
-  --surface: #FFFFFF;        /* Surface / cards */
-  --text: #1B1B1B;           /* Almost black main text */
-  --muted: #555555;          /* Muted gray for secondary text */
-  --success: #3BB273;        /* Success */
-  --error: #E94F37;          /* Error */
-  --card: var(--surface);
-  --border: #E6EDF7;
-  --toggle-bg: rgba(0,0,0,0.06);
-  --primary-600: #256b88;    /* darker primary for hover */
+  /* Palette (light theme) */
+  --primary: #2E86AB;        /* Deep ocean blue */
+  --secondary: #8AB6D6;      /* Light sky blue */
+  --accent: #F4D35E;         /* Warm gold */
+  --bg: #F0F4F8;             /* Light gray-blue background */
+  --surface: #FFFFFF;        /* Surface / cards */
+  --text: #1B1B1B;           /* Almost black main text */
+  --muted: #555555;          /* Muted gray for secondary text */
+  --success: #3BB273;        /* Success */
+  --error: #E94F37;          /* Error */
+  --card: var(--surface);
+  --border: #E6EDF7;
+  --toggle-bg: rgba(0,0,0,0.06);
+  --primary-600: #256b88;    /* darker primary for hover */
 }
 
 /* Dark theme overrides */
 [data-theme="dark"]{
-  /* Dark theme — keep primary/accent but invert surfaces/text */
-  --primary: #2E86AB;
-  --secondary: #6FA6C6;
-  --accent: #F4D35E;
-  --bg: #071428;            /* deep navy background */
-  --surface: #0F1A24;       /* dark card surface */
-  --text: #F5F7FA;          /* light text */
-  --muted: #9AA6B0;         /* muted light */
-  --card: var(--surface);
-  --border: rgba(255,255,255,0.06);
-  --toggle-bg: rgba(255,255,255,0.04);
-  --primary-600: #1f526d;
+  /* Dark theme — keep primary/accent but invert surfaces/text */
+  --primary: #2E86AB;
+  --secondary: #6FA6C6;
+  --accent: #F4D35E;
+  --bg: #071428;            /* deep navy background */
+  --surface: #0F1A24;       /* dark card surface */
+  --text: #F5F7FA;          /* light text */
+  --muted: #9AA6B0;         /* muted light */
+  --card: var(--surface);
+  --border: rgba(255,255,255,0.06);
+  --toggle-bg: rgba(255,255,255,0.04);
+  --primary-600: #1f526d;
 }
 
 *{box-sizing:border-box}
@@ -66,49 +66,48 @@ button:active{transform:scale(.995)}
 .book-summary .right{text-align:right;min-width:110px}
 .book-summary .right .big{font-weight:700;font-size:18px;color:var(--primary)}
 .logo2 {
-  height: 256px;
-  width: auto;
-  margin-right: 16px;}
+  height: 256px;
+  width: auto;
+  margin-right: 16px;}
 /* Make sure the map container has proper height & rounded corners */
 .map {
-    height: 300px;
-    width: 100%;
-    border-radius: 12px;
-    margin: 12px 0;
+    height: 300px;
+    width: 100%;
+    border-radius: 12px;
+    margin: 12px 0;
 }
 
 /* Tracker card tweaks */
 .tracker.card {
-  padding: 16px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  background: var(--card);
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  background: var(--card);
 }
 
 /* Timer styling */
 .timer {
-    font-weight: bold;
-    font-size: 1.5rem;
+    font-weight: bold;
+    font-size: 1.5rem;
 }
 
 /* Row tweaks for spacing */
 .row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
 }
 
 /* Small text spacing */
 .row.small {
-    font-size: 0.9rem;
+    font-size: 0.9rem;
 }
 
 /* Buttons inside tracker */
 .tracker .row button {
-    margin-right: 8px;
+    margin-right: 8px;
 }
-
 
 /* two-column grid for booking form inputs */
 .form .grid-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -134,9 +133,9 @@ button:active{transform:scale(.995)}
 #profileRecent li{margin-bottom:6px}
 
 @media(max-width:520px){
-  .form .grid-two{grid-template-columns:1fr}
-  .profile-card{flex-direction:column;align-items:flex-start}
-  .profile-avatar{width:72px;height:72px;border-radius:12px}
+  .form .grid-two{grid-template-columns:1fr}
+  .profile-card{flex-direction:column;align-items:flex-start}
+  .profile-avatar{width:72px;height:72px;border-radius:12px}
 }
 .history ul{padding-left:18px;margin:8px 0}
 .form label{display:block;margin-bottom:12px;color:var(--muted)}
@@ -157,8 +156,8 @@ button:active{transform:scale(.995)}
 #authStatus{margin-top:10px;color:var(--muted);font-size:13px}
 
 @media(max-width:520px){
-  #authCard{padding:12px}
-  .center{margin:20px auto}
+  #authCard{padding:12px}
+  .center{margin:20px auto}
 }
 /* Booking inline message */
 #bookingMsg{padding:8px;border-radius:8px}
@@ -171,9 +170,9 @@ button:active{transform:scale(.995)}
 /* loader animation (subtle pulse) */
 .loader{animation:loaderPulse 1.4s ease-in-out infinite}
 @keyframes loaderPulse{
-  0%{opacity:0.45;transform:translateY(0)}
-  50%{opacity:1;transform:translateY(-3px)}
-  100%{opacity:0.45;transform:translateY(0)}
+  0%{opacity:0.45;transform:translateY(0)}
+  50%{opacity:1;transform:translateY(-3px)}
+  100%{opacity:0.45;transform:translateY(0)}
 }
 .tracker .map{height:160px;border-radius:10px;background:linear-gradient(90deg,#2b6cb0,#e0f2fe);display:flex;align-items:center;justify-content:center;color:var(--muted);margin:12px 0;overflow:hidden;position:relative}
 
@@ -208,8 +207,8 @@ button:active{transform:scale(.995)}
 
 /* Responsive / mobile-first tweaks */
 @media(min-width:700px){
-  .center{margin-top:40px}
-  .content{padding:0 20px}
+  .center{margin-top:40px}
+  .content{padding:0 20px}
 }
 
 /* small helpful utils */
@@ -218,6 +217,7 @@ button:active{transform:scale(.995)}
 .meta{font-size:13px;color:var(--muted)}
 
 h1 {
-  /* Use theme-aware text color rather than a fixed blue so headings follow theme */
-  color: var(--text);
+  /* Use theme-aware text color rather than a fixed blue so headings follow theme */
+  color: var(--text);
 }
+
