@@ -1,344 +1,364 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Waiter — Stop Waiting. Send Someone Else.</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-    <!-- Firebase removed — app uses localStorage for demo mode -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <link rel="icon" href="assets/logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waiter — Stop Waiting. Send Someone Else.</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Firebase removed — app uses localStorage for demo mode -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="icon" href="assets/logo.png">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 </head>
 <body>
-    <script>
-        // Early no-op placeholders so inline onclicks don't throw before script.js loads
-        window.showScreen = window.showScreen || function(){ console.warn('showScreen called before app loaded'); };
-        window.confirmPrepay = window.confirmPrepay || function(){ console.warn('confirmPrepay called before app loaded'); };
-        window.endBooking = window.endBooking || function(){ console.warn('endBooking called before app loaded'); };
-        window.setRating = window.setRating || function(){ console.warn('setRating called before app loaded'); };
-        window.submitRating = window.submitRating || function(){ console.warn('submitRating called before app loaded'); };
-        window.saveProfile = window.saveProfile || function(){ console.warn('saveProfile called before app loaded'); };
-        window.toggleTheme = window.toggleTheme || function(){ console.warn('toggleTheme called before app loaded'); };
-        window.toggleMenu = window.toggleMenu || function(){ console.warn('toggleMenu called before app loaded'); };
-    </script>
-    <button id="menuToggle" class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">☰</button>
-    <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
-    <div id="app">
-        <!-- Splash -->
-        <section id="splash" class="screen active">
-            <div class="center">
-                <div class="logo">
-                     <img src="assets/logo.png" alt="App logo" class="logo2">
-                </div>
-                <h1 class="title">Stop Waiting.</h1>
-                <p class="tagline">Send Someone Else.</p>
-                <button class="cta" onclick="showScreen('onboard1')">Get Started</button>
-            </div>
-        </section>
+    <script>
+        // Early no-op placeholders so inline onclicks don't throw before script.js loads
+        window.showScreen = window.showScreen || function(){ console.warn('showScreen called before app loaded'); };
+        window.confirmPrepay = window.confirmPrepay || function(){ console.warn('confirmPrepay called before app loaded'); };
+        window.endBooking = window.endBooking || function(){ console.warn('endBooking called before app loaded'); };
+        window.setRating = window.setRating || function(){ console.warn('setRating called before app loaded'); };
+        window.submitRating = window.submitRating || function(){ console.warn('submitRating called before app loaded'); };
+        window.saveProfile = window.saveProfile || function(){ console.warn('saveProfile called before app loaded'); };
+        window.toggleTheme = window.toggleTheme || function(){ console.warn('toggleTheme called before app loaded'); };
+        window.toggleMenu = window.toggleMenu || function(){ console.warn('toggleMenu called before app loaded'); };
+    </script>
+<script>
+function uploadTest() {
+  const file = document.getElementById("fileTest").files[0];
+  if (!file) return console.log("No file selected");
 
-        <!-- Onboarding 1 -->
-        <section id="onboard1" class="screen">
-            <div class="content">
-                <h2>How it works</h2>
-                <ul class="features">
-                    <li>Book a verified person to wait or buy for you</li>
-                    <li>Prepay and pay per minute — only when they're working</li>
-                    <li>Track live, receive proof, and rate the service</li>
-                </ul>
-                <div class="nav-row">
-                    <button class="ghost" onclick="showScreen('splash')">Back</button>
-                    <button class="cta" onclick="showScreen('onboard2')">Next</button>
-                </div>
-            </div>
-        </section>
+  // Create a reference with timestamped filename
+  const storageRef = storage.ref(`test/${Date.now()}_${file.name}`);
 
-        <!-- Onboarding 2 -->
-        <section id="onboard2" class="screen">
-            <div class="content">
-                <h2>Safe & Verified</h2>
-                <p>All waiters are verified and rated by customers.</p>
-                <div class="nav-row">
-                    <button class="ghost" onclick="showScreen('onboard1')">Back</button>
-                    <button class="cta" onclick="showScreen('dashboard')">Go to App</button>
-                </div>
-            </div>
-        </section>
+  storageRef.put(file)
+    .then(snapshot => snapshot.ref.getDownloadURL())
+    .then(url => {
+      console.log("Storage is working! File URL:", url);
+    })
+    .catch(err => console.error("Storage failed:", err));
+}
+</script>
 
-        <!-- Dashboard -->
-        <section id="dashboard" class="screen">
-            <header class="header">
-                <h3>Welcome back</h3>
-                <button class="icon" onclick="showScreen('profile')">👤</button>
-            </header>
-            <main class="content">
-                <!-- Account UI removed (login/signup removed per request) -->
-                <div class="card active-booking" id="activeBookingMock" style="display:none;">
-                    <h4>Active Booking</h4>
-                    <div id="activeSummary">No active booking</div>
-                   <div class="row">
-  <button id="proofInputDashboard" class="cta" onclick="showPaymentOptions()">Complete & Pay</button>
+    <button id="menuToggle" class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">☰</button>
+    <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
+    <div id="app">
+        <!-- Splash -->
+        <section id="splash" class="screen active">
+            <div class="center">
+                <div class="logo">
+                     <img src="assets/logo.png" alt="App logo" class="logo2">
+                </div>
+                <h1 class="title">Stop Waiting.</h1>
+                <p class="tagline">Send Someone Else.</p>
+                <button class="cta" onclick="showScreen('onboard1')">Get Started</button>
+            </div>
+        </section>
+
+        <!-- Onboarding 1 -->
+        <section id="onboard1" class="screen">
+            <div class="content">
+                <h2>How it works</h2>
+                <ul class="features">
+                    <li>Book a verified person to wait or buy for you</li>
+                    <li>Prepay and pay per minute — only when they're working</li>
+                    <li>Track live, receive proof, and rate the service</li>
+                </ul>
+                <div class="nav-row">
+                    <button class="ghost" onclick="showScreen('splash')">Back</button>
+                    <button class="cta" onclick="showScreen('onboard2')">Next</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Onboarding 2 -->
+        <section id="onboard2" class="screen">
+            <div class="content">
+                <h2>Safe & Verified</h2>
+                <p>All waiters are verified and rated by customers.</p>
+                <div class="nav-row">
+                    <button class="ghost" onclick="showScreen('onboard1')">Back</button>
+                    <button class="cta" onclick="showScreen('dashboard')">Go to App</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard -->
+        <section id="dashboard" class="screen">
+            <header class="header">
+                <h3>Welcome back</h3>
+                <button class="icon" onclick="showScreen('profile')">👤</button>
+            </header>
+            <main class="content">
+                <!-- Account UI removed (login/signup removed per request) -->
+                <div class="card active-booking" id="activeBookingMock" style="display:none;">
+                    <h4>Active Booking</h4>
+                    <div id="activeSummary">No active booking</div>
+                   <div class="row">
+  <button id="proofInputDashboard" class="cta" onclick="showPaymentOptions()">Complete & Pay</button>
 </div>
 
 <div id="paymentOptions" class="card" style="display:none; margin-top:12px;">
-  <h4>Select payment method</h4>
-  <button class="ghost" onclick="selectPayment('CBE 1000151730217')">
-    CBE • 1000151730217
-  </button>
-  <button class="ghost" onclick="selectPayment('Telebirr +251913386974')">
-    Telebirr • +251913386974
-  </button>
+  <h4>Select payment method</h4>
+  <button class="ghost" onclick="selectPayment('CBE 1000151730217')">
+    CBE • 1000151730217
+  </button>
+  <button class="ghost" onclick="selectPayment('Telebirr +251913386974')">
+    Telebirr • +251913386974
+  </button>
 </div>
 
 <div id="proofSection" style="display:none; margin-top:12px;">
-  <label>Upload payment proof
-    <input id="proofInput" type="file" accept="image/*" required />
-  </label>
-  <button class="cta" onclick="endBooking()">Confirm & Finish</button>
+  <label>Upload payment proof
+    <input id="proofInput" type="file" accept="image/*" required />
+  </label>
+  <button class="cta" onclick="endBooking()">Confirm & Finish</button>
 </div>
 
-                </div>
+                </div>
 
-                <div style="text-align:center;margin-top:12px">
-                    <button class="cta bookNow" onclick="showScreen('booking')">Book Now</button>
-                </div>
+                <div style="text-align:center;margin-top:12px">
+                    <button class="cta bookNow" onclick="showScreen('booking')">Book Now</button>
+                </div>
 
-                <!-- hero and history moved to booking page -->
-            </main>
-        </section>
+                <!-- hero and history moved to booking page -->
+            </main>
+        </section>
 
-        <!-- Booking Form -->
-        <section id="booking" class="screen">
-            <header class="header">
-                <button class="icon" onclick="showScreen('dashboard')">←</button>
-                <h3>New Booking</h3>
-                <div></div>
-            </header>
-            <main class="content form">
-                <!-- Hero moved here from dashboard -->
-                <div class="hero">
-                    <h2>Save time. Book a waiter.</h2>
-                    <p>We’ll wait, buy, or collect for you — paid per minute.</p>
-                    <button class="bookNow" onclick="showScreen('booking')">Book a Waiter</button>
-                </div>
-                <div class="book-summary">
-                    <div class="left">
-                        <div class="small muted">Quick summary</div>
-                        <div class="meta">Rate per minute <strong id="ratePerMin">2.00ETB</strong></div>
-                    </div>
-                    <div class="right">
-                        <div class="small muted">Estimated</div>
-                        <div class="big" id="estimatedCost">10.00ETB</div>
-                    </div>
-                </div>
-                <!-- Added: small customer-facing booking inputs (kept in addition to existing fields) -->
-                <div class="grid-two">
-                  <label>Customer name
-                      <input id="bookingCustomerName" placeholder="Your name (optional)" />
-                  </label>
+        <!-- Booking Form -->
+        <section id="booking" class="screen">
+            <header class="header">
+                <button class="icon" onclick="showScreen('dashboard')">←</button>
+                <h3>New Booking</h3>
+                <div></div>
+            </header>
+            <main class="content form">
+                <!-- Hero moved here from dashboard -->
+                <div class="hero">
+                    <h2>Save time. Book a waiter.</h2>
+                    <p>We’ll wait, buy, or collect for you — paid per minute.</p>
+                    <button class="bookNow" onclick="showScreen('booking')">Book a Waiter</button>
+                </div>
+                <div class="book-summary">
+                    <div class="left">
+                        <div class="small muted">Quick summary</div>
+                        <div class="meta">Rate per minute <strong id="ratePerMin">2.00ETB</strong></div>
+                    </div>
+                    <div class="right">
+                        <div class="small muted">Estimated</div>
+                        <div class="big" id="estimatedCost">10.00ETB</div>
+                    </div>
+                </div>
+                <!-- Added: small customer-facing booking inputs (kept in addition to existing fields) -->
+                <div class="grid-two">
+                  <label>Customer name
+                      <input id="bookingCustomerName" placeholder="Your name (optional)" />
+                  </label>
 
-                  <label>Minutes (quick entry)
-                      <input id="bookingMinutes" type="number" min="1" value="15" />
-                  </label>
-                </div>
+                  <label>Minutes (quick entry)
+                      <input id="bookingMinutes" type="number" min="1" value="15" />
+                  </label>
+                </div>
 
-                <div id="bookingMsg" class="muted small" aria-live="polite" style="margin-bottom:8px"></div>
+                <div id="bookingMsg" class="muted small" aria-live="polite" style="margin-bottom:8px"></div>
 
-                <label>Location
-                    <input id="inputLocation" placeholder="Enter address or place" />
-                </label>
-                <div class="grid-two">
-                  <label>Task Type
-                    <select id="inputTask">
-                        <option value="wait">Stand in line</option>
-                        <option value="buy">Buy something</option>
-                        <option value="collect">Collect tickets</option>
-                    </select>
+                <label>Location
+                    <input id="inputLocation" placeholder="Enter address or place" />
+                </label>
+                <div class="grid-two">
+                  <label>Task Type
+                    <select id="inputTask">
+                        <option value="wait">Stand in line</option>
+                        <option value="buy">Buy something</option>
+                        <option value="collect">Collect tickets</option>
+                    </select>
 
-                  <label>Optional purchase (amount)
-                      <input id="inputPurchase" type="number" min="0" value="0" />
-                  </label>
-                </div>
-                <label>Estimated wait (minutes)
-                    <input id="inputMinutes" type="number" min="5" value="20" />
-                </label>
+                  <label>Optional purchase (amount)
+                      <input id="inputPurchase" type="number" min="0" value="0" />
+                  </label>
+                </div>
+                <label>Estimated wait (minutes)
+                    <input id="inputMinutes" type="number" min="5" value="20" />
+                </label>
 
-                <div class="costPreview">
-                    <div>Rate per minute: <strong id="ratePerMin">2.00ETB</strong></div>
-                    <div>Estimated cost: <strong id="estimatedCost">10.00ETB</strong></div>
-                </div>
+                <div class="costPreview">
+                    <div>Rate per minute: <strong id="ratePerMin">2.00ETB</strong></div>
+                    <div>Estimated cost: <strong id="estimatedCost">10.00ETB</strong></div>
+                </div>
 
-                <div class="nav-row">
-                    <button class="ghost" onclick="showScreen('dashboard')">Cancel</button>
-                    <button class="cta" id="confirmPrepayBtn">Confirm & Prepay</button>
-                </div>
-                <!-- Previous bookings history moved here from dashboard -->
-            </main>
-            <section class="history card">
-                <h4>Previous bookings</h4>
-                <ul id="historyList"><li>No previous bookings yet.</li></ul>
-            </section>
-        </section>
+                <div class="nav-row">
+                    <button class="ghost" onclick="showScreen('dashboard')">Cancel</button>
+                    <button class="cta" id="confirmPrepayBtn">Confirm & Prepay</button>
+                </div>
+                <!-- Previous bookings history moved here from dashboard -->
+            </main>
+            <section class="history card">
+                <h4>Previous bookings</h4>
+                <ul id="historyList"><li>No previous bookings yet.</li></ul>
+            </section>
+        </section>
 
-        <!-- Matching Screen -->
-        <section id="matching" class="screen">
-            <div class="center">
-                <h3>Matching you with a waiter</h3>
-                <p class="muted">This usually takes a few moments.</p>
-                <div class="waiterCard">
-                    <img src="assets/waiterpfp.jpg" alt="waiter" />
-                    <div>
-                        <div class="name" id="waiterName">—</div>
-                        <div class="meta" id="waiterMeta">Rating • Jobs</div>
-                    </div>
-                </div>
-                <div class="loader">assigning…</div>
-                <div class="nav-row">
-                    <button class="ghost" onclick="showScreen('dashboard')">Cancel</button>
-                </div>
-            </div>
-        </section>
+        <!-- Matching Screen -->
+        <section id="matching" class="screen">
+            <div class="center">
+                <h3>Matching you with a waiter</h3>
+                <p class="muted">This usually takes a few moments.</p>
+                <div class="waiterCard">
+                    <img src="assets/waiterpfp.jpg" alt="waiter" />
+                    <div>
+                        <div class="name" id="waiterName">—</div>
+                        <div class="meta" id="waiterMeta">Rating • Jobs</div>
+                    </div>
+                </div>
+                <div class="loader">assigning…</div>
+                <div class="nav-row">
+                    <button class="ghost" onclick="showScreen('dashboard')">Cancel</button>
+                </div>
+            </div>
+        </section>
 
-        <!-- Live Tracking -->
-        <section id="live" class="screen">
-    <header class="header">
-        <button class="icon" onclick="showScreen('dashboard')">←</button>
-        <h3>Live Tracking</h3>
-        <div></div>
-    </header>
-    <main class="content">
-        <div class="tracker card">
-            <!-- Waiter info & timer -->
-            <div class="row between">
-                <div>
-                    <div id="liveWaiterName">—</div>
-                    <div class="muted" id="liveWaiterStatus">Arriving</div>
-                </div>
-                <div class="timer" id="liveTimer">00:00</div>
-            </div> 
-            <!-- Map -->
+        <!-- Live Tracking -->
+        <section id="live" class="screen">
+    <header class="header">
+        <button class="icon" onclick="showScreen('dashboard')">←</button>
+        <h3>Live Tracking</h3>
+        <div></div>
+    </header>
+    <main class="content">
+        <div class="tracker card">
+            <!-- Waiter info & timer -->
+            <div class="row between">
+                <div>
+                    <div id="liveWaiterName">—</div>
+                    <div class="muted" id="liveWaiterStatus">Arriving</div>
+                </div>
+                <div class="timer" id="liveTimer">00:00</div>
+            </div> 
+            <!-- Map -->
 <div id="mapPlaceholder" class="map"style="height: 500px; width: 100%; border-radius:12px; margin: 12px 0;"> Map loading...</div>
 
-            <!-- Cost & Rate -->
-            <div class="row between small">
-                <div>Cost: <strong id="liveCost">0.00ETB</strong></div>
-                <div id="liveEarning">Rate: 2.00ETB/min</div>
-            </div>
-            <!-- Action buttons -->
-            <div class="row">
-  <button class="cta" onclick="showPaymentOptions()">Complete & Pay</button>
+            <!-- Cost & Rate -->
+            <div class="row between small">
+                <div>Cost: <strong id="liveCost">0.00ETB</strong></div>
+                <div id="liveEarning">Rate: 2.00ETB/min</div>
+            </div>
+            <!-- Action buttons -->
+            <div class="row">
+  <button class="cta" onclick="showPaymentOptions()">Complete & Pay</button>
 </div>
-        </div>
-    </main>
+        </div>
+    </main>
 
-    <!-- Leaflet initialization removed (handled once in script.js) -->
+    <!-- Leaflet initialization removed (handled once in script.js) -->
 </section>
-        <!-- Completion -->
-        <section id="complete" class="screen">
-            <div class="center">
-                <h3>Job Complete</h3>
-                <p id="finalSummary">Thanks — here's your summary.</p>
-                <div class="card rating">
-                    <h4>Rate your waiter</h4>
-                    <div class="stars" id="ratingStars">
-                        <button onclick="setRating(1)">★</button>
-                        <button onclick="setRating(2)">★</button>
-                        <button onclick="setRating(3)">★</button>
-                        <button onclick="setRating(4)">★</button>
-                        <button onclick="setRating(5)">★</button>
-                    </div>
-                    <label>Tip (optional)
-                        <input id="tipInput" type="number" min="0" value="0" />
-                    </label>
-                    <div class="nav-row">
-                        <button class="ghost" onclick="showScreen('dashboard')">Close</button>
-                        <button class="cta" onclick="submitRating()">Submit</button>
-                    </div>
-                </div>
-                <button class="link" onclick="showScreen('support')">Report an issue</button>
-            </div>
-        </section>
+        <!-- Completion -->
+        <section id="complete" class="screen">
+            <div class="center">
+                <h3>Job Complete</h3>
+                <p id="finalSummary">Thanks — here's your summary.</p>
+                <div class="card rating">
+                    <h4>Rate your waiter</h4>
+                    <div class="stars" id="ratingStars">
+                        <button onclick="setRating(1)">★</button>
+                        <button onclick="setRating(2)">★</button>
+                        <button onclick="setRating(3)">★</button>
+                        <button onclick="setRating(4)">★</button>
+                        <button onclick="setRating(5)">★</button>
+                    </div>
+                    <label>Tip (optional)
+                        <input id="tipInput" type="number" min="0" value="0" />
+                    </label>
+                    <div class="nav-row">
+                        <button class="ghost" onclick="showScreen('dashboard')">Close</button>
+                        <button class="cta" onclick="submitRating()">Submit</button>
+                    </div>
+                </div>
+                <button class="link" onclick="showScreen('support')">Report an issue</button>
+            </div>
+        </section>
 
-        <!-- Profile -->
-        <section id="profile" class="screen">
-            <header class="header">
-                <button class="icon" onclick="showScreen('dashboard')">←</button>
-                <h3>Profile</h3>
-                <div></div>
-            </header>
-            <main class="content">
-                <div class="card profile-card">
-                    <div class="profile-avatar" id="profileAvatar">JU</div>
-                    <div class="profile-details">
-                        <div class="profile-row">
-                            <label>Name
-                                <input id="profileName" value="Jane User" />
-                            </label>
-                            <label>Contact
-                                <input id="profileContact" value="(555) 123-4567" />
-                            </label>
-                            <label>Payment (mock)
-                                <input id="profilePayment" value="**** **** **** 4242" />
-                            </label>
-                        </div>
-                        <div class="nav-row">
-                            <button class="ghost" onclick="showScreen('dashboard')">Back</button>
-                            <button class="cta" onclick="saveProfile()">Save</button>
-                        </div>
-                    </div>
-                    <aside class="profile-side">
-                        <div class="profile-stat">
-                            <div class="stat-value" id="profileRating">4.9</div>
-                            <div class="stat-label">Rating</div>
-                        </div>
-                        <div class="profile-stat">
-                            <div class="stat-value" id="bookingCount">0</div>
-                            <div class="stat-label">Bookings</div>
-                        </div>
-                    </aside>
-                </div>
-                <div class="card">
-                    <h4>Recent bookings</h4>
-                    <ul id="profileRecent" class="muted small"><li>No recent bookings.</li></ul>
-                </div>
-                <div class="card">
-                    <h4>Wallet</h4>
-                    <div>Balance: <strong id="walletBalance">50.00ETB</strong></div>
-                </div>
-            </main>
-        </section>
+        <!-- Profile -->
+        <section id="profile" class="screen">
+            <header class="header">
+                <button class="icon" onclick="showScreen('dashboard')">←</button>
+                <h3>Profile</h3>
+                <div></div>
+            </header>
+            <main class="content">
+                <div class="card profile-card">
+                    <div class="profile-avatar" id="profileAvatar">JU</div>
+                    <div class="profile-details">
+                        <div class="profile-row">
+                            <label>Name
+                                <input id="profileName" value="Jane User" />
+                            </label>
+                            <label>Contact
+                                <input id="profileContact" value="(555) 123-4567" />
+                            </label>
+                            <label>Payment (mock)
+                                <input id="profilePayment" value="**** **** **** 4242" />
+                            </label>
+                        </div>
+                        <div class="nav-row">
+                            <button class="ghost" onclick="showScreen('dashboard')">Back</button>
+                            <button class="cta" onclick="saveProfile()">Save</button>
+                        </div>
+                    </div>
+                    <aside class="profile-side">
+                        <div class="profile-stat">
+                            <div class="stat-value" id="profileRating">4.9</div>
+                            <div class="stat-label">Rating</div>
+                        </div>
+                        <div class="profile-stat">
+                            <div class="stat-value" id="bookingCount">0</div>
+                            <div class="stat-label">Bookings</div>
+                        </div>
+                    </aside>
+                </div>
+                <div class="card">
+                    <h4>Recent bookings</h4>
+                    <ul id="profileRecent" class="muted small"><li>No recent bookings.</li></ul>
+                </div>
+                <div class="card">
+                    <h4>Wallet</h4>
+                    <div>Balance: <strong id="walletBalance">50.00ETB</strong></div>
+                </div>
+            </main>
+        </section>
 
-        <!-- Support / FAQ / Legal -->
-        <section id="support" class="screen">
-            <header class="header">
-                <button class="icon" onclick="showScreen('dashboard')">←</button>
-                <h3>Support</h3>
-                <div></div>
-            </header>
-            <main class="content">
-                <div class="card">
-                    <h4>FAQ</h4>
-                    <ul>
-                        <li>How are waiters verified? — By ID and background checks.</li>
-                        <li>Can I cancel? — Prepayment prevents cancellations.</li>
-                        <li>Is my purchase covered? — You provide funds for purchases.</li>
-                    </ul>
-                    <button class="cta" onclick="showScreen('legal')">Terms & Privacy</button>
-                </div>
-            </main>
-        </section>
+        <!-- Support / FAQ / Legal -->
+        <section id="support" class="screen">
+            <header class="header">
+                <button class="icon" onclick="showScreen('dashboard')">←</button>
+                <h3>Support</h3>
+                <div></div>
+            </header>
+            <main class="content">
+                <div class="card">
+                    <h4>FAQ</h4>
+                    <ul>
+                        <li>How are waiters verified? — By ID and background checks.</li>
+                        <li>Can I cancel? — Prepayment prevents cancellations.</li>
+                        <li>Is my purchase covered? — You provide funds for purchases.</li>
+                    </ul>
+                    <button class="cta" onclick="showScreen('legal')">Terms & Privacy</button>
+                </div>
+            </main>
+        </section>
 
-        <section id="legal" class="screen">
-            <header class="header">
-                <button class="icon" onclick="showScreen('support')">←</button>
-                <h3>Legal</h3>
-                <div></div>
-            </header>
-            <main class="content">
-                <div class="card">
-                    <h4>Terms of Service</h4>
-                    <p>1. Introduction
+        <section id="legal" class="screen">
+            <header class="header">
+                <button class="icon" onclick="showScreen('support')">←</button>
+                <h3>Legal</h3>
+                <div></div>
+            </header>
+            <main class="content">
+                <div class="card">
+                    <h4>Terms of Service</h4>
+                    <p>1. Introduction
 We value your privacy. This Privacy Policy explains how we collect, use, and protect your personal information when you use our website and services.
 
 2. Information We Collect
@@ -369,8 +389,8 @@ We may update this policy occasionally. The updated version will be posted on th
 
 8. Contact Us
 For questions about this policy, email: waiterapp101@gmail.com .</p>
-                    <h4>Privacy Policy</h4>
-                    <p>Effective Date: December 26, 2025
+                    <h4>Privacy Policy</h4>
+                    <p>Effective Date: December 26, 2025
 
 1. Acceptance of Terms
 By using our website or services, you agree to these Terms of Service.
@@ -408,18 +428,17 @@ These Terms are governed by the laws of Ethiopia.
 9. Contact
 Questions regarding these Terms can be sent to: waiterapp101@gmail.com.
 </p>
-                </div>
-            </main>
-        </section>
-    </div>
+                </div>
+            </main>
+        </section>
+    </div>
 
-        <nav id="mobileMenu" class="mobile-menu" aria-hidden="true" role="menu">
-        <button class="mobile-item" role="menuitem" onclick="showScreen('dashboard');toggleMenu(false)">Home</button>
-        <button class="mobile-item" role="menuitem" onclick="showScreen('booking');toggleMenu(false)">Book</button>
-        <button class="mobile-item" role="menuitem" onclick="showScreen('support');toggleMenu(false)">Help</button>
-    </nav>
-    <div id="menuBackdrop" class="menu-backdrop" tabindex="-1" onclick="toggleMenu(false)"></div>
-    <script src="script.js"></script>
+        <nav id="mobileMenu" class="mobile-menu" aria-hidden="true" role="menu">
+        <button class="mobile-item" role="menuitem" onclick="showScreen('dashboard');toggleMenu(false)">Home</button>
+        <button class="mobile-item" role="menuitem" onclick="showScreen('booking');toggleMenu(false)">Book</button>
+        <button class="mobile-item" role="menuitem" onclick="showScreen('support');toggleMenu(false)">Help</button>
+    </nav>
+    <div id="menuBackdrop" class="menu-backdrop" tabindex="-1" onclick="toggleMenu(false)"></div>
+    <script src="script.js"></script>
 </body>
 </html>
-
