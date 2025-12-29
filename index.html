@@ -120,10 +120,6 @@ function uploadTest() {
 
                 </div>
 
-                <div style="text-align:center;margin-top:12px">
-                    <button class="cta bookNow" onclick="showScreen('booking')">Book Now</button>
-                </div>
-
                 <!-- hero and history moved to booking page -->
             </main>
         </section>
@@ -140,16 +136,11 @@ function uploadTest() {
                 <div class="hero">
                     <h2>Save time. Book a waiter.</h2>
                     <p>We’ll wait, buy, or collect for you — paid per minute.</p>
-                    <button class="bookNow" onclick="showScreen('booking')">Book a Waiter</button>
                 </div>
                 <div class="book-summary">
                     <div class="left">
                         <div class="small muted">Quick summary</div>
                         <div class="meta">Rate per minute <strong id="ratePerMin">2.00ETB</strong></div>
-                    </div>
-                    <div class="right">
-                        <div class="small muted">Estimated</div>
-                        <div class="big" id="estimatedCost">10.00ETB</div>
                     </div>
                 </div>
                 <!-- Added: small customer-facing booking inputs (kept in addition to existing fields) -->
@@ -186,12 +177,11 @@ function uploadTest() {
 
                 <div class="costPreview">
                     <div>Rate per minute: <strong id="ratePerMin">2.00ETB</strong></div>
-                    <div>Estimated cost: <strong id="estimatedCost">10.00ETB</strong></div>
                 </div>
 
                 <div class="nav-row">
                     <button class="ghost" onclick="showScreen('dashboard')">Cancel</button>
-                    <button class="cta" id="confirmPrepayBtn">Confirm & Prepay</button>
+                    <button class="cta" id="confirmPrepayBtn">Confirm</button>
                 </div>
                 <!-- Previous bookings history moved here from dashboard -->
             </main>
@@ -293,13 +283,13 @@ function uploadTest() {
                     <div class="profile-details">
                         <div class="profile-row">
                             <label>Name
-                                <input id="profileName" value="Jane User" />
+                                <input id="profileName" value="Chala" />
                             </label>
                             <label>Contact
-                                <input id="profileContact" value="(555) 123-4567" />
+                                <input id="profileContact" value="(251) 9133******" />
                             </label>
                             <label>Payment (mock)
-                                <input id="profilePayment" value="**** **** **** 4242" />
+                                <input id="profilePayment" value="1000 **** **** 4242" />
                             </label>
                         </div>
                         <div class="nav-row">
@@ -341,7 +331,7 @@ function uploadTest() {
                     <h4>FAQ</h4>
                     <ul>
                         <li>How are waiters verified? — By ID and background checks.</li>
-                        <li>Can I cancel? — Prepayment prevents cancellations.</li>
+                        <li>Can I cancel? — Yes you can after contacting our customer service.</li>
                         <li>Is my purchase covered? — You provide funds for purchases.</li>
                     </ul>
                     <button class="cta" onclick="showScreen('legal')">Terms & Privacy</button>
@@ -434,9 +424,9 @@ Questions regarding these Terms can be sent to: waiterapp101@gmail.com.
     </div>
 
         <nav id="mobileMenu" class="mobile-menu" aria-hidden="true" role="menu">
-        <button class="mobile-item" role="menuitem" onclick="showScreen('dashboard');toggleMenu(false)">Home</button>
-        <button class="mobile-item" role="menuitem" onclick="showScreen('booking');toggleMenu(false)">Book</button>
-        <button class="mobile-item" role="menuitem" onclick="showScreen('support');toggleMenu(false)">Help</button>
+        <button class="mobile-item" role="menuitem" data-target="dashboard">Home</button>
+        <button class="mobile-item" role="menuitem" data-target="booking">Book</button>
+        <button class="mobile-item" role="menuitem" data-target="support">Help</button>
     </nav>
     <div id="menuBackdrop" class="menu-backdrop" tabindex="-1" onclick="toggleMenu(false)"></div>
     <script src="script.js"></script>
